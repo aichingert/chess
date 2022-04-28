@@ -1,6 +1,13 @@
-/* CHESS CLONE */
+/*              CHESS CLONE 
+By:             Tobias Aichinger
+Bevy version:   "0.7" / 2022
+*/
 
 use bevy::{prelude::*, window::WindowResizeConstraints};
+
+mod pawn;
+
+use pawn::PawnPlugin;
 
 const SQUARE_SIZE: f32 = 75.0;
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
@@ -21,7 +28,7 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
-        .add_startup_system(setup)
+        .add_startup_system(create_board)
         .run();
 }
 
@@ -29,7 +36,7 @@ fn main() {
 struct Square;
 
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Cameras
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
@@ -89,7 +96,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         }
     }
 
-    // Adding pieces (random png for now)
+    // Adding pieces (random png for now) only temporary here
     commands.spawn_bundle(SpriteBundle {
         texture: asset_server.load("king.png"),
         transform: Transform {
@@ -98,5 +105,4 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         ..default()
     });
-
 }
