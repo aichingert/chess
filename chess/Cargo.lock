@@ -852,13 +852,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1db59621ec70f09c5e9b597b220c7a2b43611f4710dc03ceb8748637775692c"
 
 [[package]]
-name = "car_race"
-version = "0.1.0"
-dependencies = [
- "bevy",
-]
-
-[[package]]
 name = "cargo-manifest"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -910,6 +903,13 @@ name = "cfg_aliases"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
+
+[[package]]
+name = "chess_clone"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
 
 [[package]]
 name = "clang-sys"

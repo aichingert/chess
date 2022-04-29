@@ -1,5 +1,5 @@
 [package]
-name = "car_race"
+name = "chess_clone"
 version = "0.1.0"
 edition = "2021"
 
