@@ -1,2 +1,3 @@
 # Chess-Clone
-## still learning
+## Bevy
+- not playable yet
