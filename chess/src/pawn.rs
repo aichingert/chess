@@ -11,7 +11,7 @@ impl Plugin for PawnPlugin {
     }
 }
 
-fn pawn_movement(pawn_query: Query<(&Pawn, &mut Transform)>, mouse: Res<Input<KeyCode>>) {
+fn pawn_movement(pawn_query: Query<(&Pawn, &mut Transform)>, mouse: Res<Input<MouseButton>>) {
 
 }
 

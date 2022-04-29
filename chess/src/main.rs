@@ -5,9 +5,10 @@ Bevy version:   "0.7" / 2022
 
 use bevy::{prelude::*, window::WindowResizeConstraints};
 
-mod pawn;
+mod input;
 
-use pawn::PawnPlugin;
+use input::InputPlugin;
+
 
 const SQUARE_SIZE: f32 = 75.0;
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
@@ -29,6 +30,7 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_startup_system(create_board)
+        .add_plugin(InputPlugin)
         .run();
 }
 
