@@ -1,4 +1,4 @@
-use {bevy::prelude::*, bevy::input::mouse::MouseMotion, bevy::input::mouse::MouseWheel};
+use bevy::prelude::*;
 
 #[derive()]
 pub struct InputPlugin;
@@ -9,25 +9,26 @@ impl Plugin for InputPlugin {
     }
 }
 
+#[derive(Component)]
+struct Piece;
+
 fn print_mouse_events_system(
-    mut mouse_button_input_events: EventReader<MouseButton>,
-    mut mouse_motion_events: EventReader<MouseMotion>,
-    mut cursor_moved_events: EventReader<CursorMoved>,
-    mut mouse_wheel_events: EventReader<MouseWheel>,
+    mut mouse_button_input: Res<Input<MouseButton>>,
+    mut query: Query<&mut Transform, With<Piece>>,
 ) {
-    for event in mouse_button_input_events.iter() {
-        info!("{:?}", event);
+    let mut direction: f32 = 0.0;
+    let mut piece_transform = query.single_mut();
+
+    if mouse_button_input.pressed(MouseButton::Left) {
+        direction -= 1.0;
     }
 
-    for event in mouse_motion_events.iter() {
-        info!("{:?}", event);
+    if mouse_button_input.pressed(MouseButton::Right) {
+        direction += 1.0;
     }
 
-    for event in cursor_moved_events.iter() {
-        info!("{:?}", event);
-    }
+    let new_piece_position = piece_transform.translation.x + direction;
 
-    for event in mouse_wheel_events.iter() {
-        info!("{:?}", event);
-    }
+
+    piece_transform.translation.x = new_piece_position.clamp(-(super::SQUARE_SIZE * 8.0) / 2.0, (super::SQUARE_SIZE * 8.0) / 2.0);
 }

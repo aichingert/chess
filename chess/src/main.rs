@@ -29,8 +29,8 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
-        .add_startup_system(create_board)
         .add_plugin(InputPlugin)
+        .add_startup_system(create_board)
         .run();
 }
 
@@ -46,9 +46,10 @@ fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Calculate position because it's automaticly placed in the middle
     let center_of_bricks = 0.0;
     let left_edge_of_bricks = center_of_bricks - (8 as f32 / 2.0 * SQUARE_SIZE);
+    let bottom_edge_of_bricks = center_of_bricks - (8 as f32 / 2.0 * SQUARE_SIZE);
 
     let offset_x = left_edge_of_bricks + SQUARE_SIZE / 2.;
-    let offset_y = (-300.0) + SQUARE_SIZE / 2.;
+    let offset_y = bottom_edge_of_bricks + SQUARE_SIZE / 2.;
 
 
     // Create Chessboard 8x8
@@ -99,10 +100,11 @@ fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
     }
 
     // Adding pieces (random png for now) only temporary here
-    commands.spawn_bundle(SpriteBundle {
+    commands
+    .spawn_bundle(SpriteBundle {
         texture: asset_server.load("king.png"),
         transform: Transform {
-            scale: Vec3::new(0.25, 0.25, 1.0),
+            scale: Vec3::new(0.1, 0.1, 1.0),
             ..default()
         },
         ..default()
