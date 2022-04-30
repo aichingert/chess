@@ -3,6 +3,8 @@ By:             Tobias Aichinger
 Bevy version:   "0.7" / 2022
 */
 
+use std::process::id;
+
 use bevy::{prelude::*, window::WindowResizeConstraints};
 
 mod input;
@@ -100,7 +102,7 @@ fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
     }
 
     // Adding pieces (random png for now) only temporary here
-    commands
+    let king = commands
     .spawn_bundle(SpriteBundle {
         texture: asset_server.load("king.png"),
         transform: Transform {
@@ -108,5 +110,6 @@ fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         ..default()
-    });
+    })
+    .id();
 }
