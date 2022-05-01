@@ -3,14 +3,12 @@ By:             Tobias Aichinger
 Bevy version:   "0.7" / 2022
 */
 
-use std::process::id;
-
 use bevy::{prelude::*, window::WindowResizeConstraints};
 
 mod input;
+mod piece;
 
 use input::InputPlugin;
-
 
 const SQUARE_SIZE: f32 = 75.0;
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
@@ -39,6 +37,8 @@ fn main() {
 #[derive(Component)]
 struct Square;
 
+#[derive(Component)]
+struct King;
 
 fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Cameras

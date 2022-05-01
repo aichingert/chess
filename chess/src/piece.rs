@@ -18,12 +18,18 @@ pub enum PieceColor {
 #[derive(Component)]
 pub struct Piece {
     kind: Kind,
-    color: Color,
+    color: PieceColor,
     position: (f32, f32),
 }
 
+pub trait Move {
+    fn standard(piece: Piece, from: (f32, f32), to: (f32, f32)) -> Piece {
+        piece
+    }
+}
+
 impl Piece {
-    pub fn white(kind: Kind, position: (f32, f32)) -> self {
+    fn white(kind: Kind, position: (f32, f32)) -> Piece {
         Piece {
             kind,
             color: PieceColor::White,
@@ -31,7 +37,7 @@ impl Piece {
         }
     }
 
-    pub fn black(kind: Kind, position: (f32, f32)) -> self {
+    fn black(kind: Kind, position: (f32, f32)) -> Piece {
         Piece {
             kind,
             color: PieceColor::Black,
@@ -40,22 +46,10 @@ impl Piece {
     }
 }
 
-pub impl CheckPawnMoves for Piece::Pawn {
-    fn standard(from: (f32, f32), to: (f32, f32)) -> bool {
+impl Move for Piece {
+    fn standard(piece: Piece, from: (f32, f32), to: (f32, f32)) -> Piece {
 
+        piece
     }
 
-    fn en_passant(from: (f32, f32), to: (f32, f32)) -> bool {
-
-    }
-}
-
-pub impl PawnMoves for Piece::Pawn {
-    fn standard(from: (f32, f32), to: (f32, f32), id: Entity) -> Entity {
-
-    }
-
-    fn en_passant(from: (f32, f32), to: (f32, f32), id: Entity) -> Entity {
-        
-    }
 }
