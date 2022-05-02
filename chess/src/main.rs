@@ -5,10 +5,9 @@ Bevy version:   "0.7" / 2022
 
 use bevy::{prelude::*, window::WindowResizeConstraints};
 
-mod input;
 mod piece;
 
-use input::InputPlugin;
+use piece::*;
 
 const SQUARE_SIZE: f32 = 75.0;
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
@@ -29,7 +28,6 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
-        .add_plugin(InputPlugin)
         .add_startup_system(create_board)
         .run();
 }
@@ -102,14 +100,18 @@ fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
     }
 
     // Adding pieces (random png for now) only temporary here
+
+    for i in 0..8 {
     let king = commands
     .spawn_bundle(SpriteBundle {
         texture: asset_server.load("king.png"),
         transform: Transform {
-            scale: Vec3::new(0.1, 0.1, 1.0),
+            translation: Vec3::new(offset_x + i as f32 * SQUARE_SIZE, offset_y + SQUARE_SIZE, 0.0),
+            scale: Vec3::new(0.08, 0.08, 1.0),
             ..default()
         },
         ..default()
     })
     .id();
+    }
 }
