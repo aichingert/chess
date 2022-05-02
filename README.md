@@ -5,7 +5,10 @@
 - checkmate and stalemate implementation
 - promotion, en passant and castling will be possible
 
-| Date | Milestone |
+## Milestones
+
+| Date | Description |
+| --| -----| 
 | 6.5 | Add missing Pieces |
 | 1.6 | Movement system (not even possible move detection just move) |
 | 1.7 | Finished Prototype |
