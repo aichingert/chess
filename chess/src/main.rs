@@ -9,6 +9,9 @@ mod piece;
 
 use piece::*;
 
+// Calculate offset because piece is always placed in the middle
+const OFFSET: f32 = (-(8 as f32 / 2.0 * SQUARE_SIZE)) + SQUARE_SIZE / 2.;
+
 const SQUARE_SIZE: f32 = 75.0;
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
 const LIGTH_BROWN_COLOR: Color = Color::rgb(240.0 / 255.0, 217.0 / 255.0, 181.0 / 255.0);
@@ -28,6 +31,7 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(PiecePlugin)
         .add_startup_system(create_board)
         .run();
 }
@@ -38,26 +42,18 @@ struct Square;
 #[derive(Component)]
 struct King;
 
-fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn create_board(mut commands: Commands) {
     // Cameras
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
-
-    // Calculate position because it's automaticly placed in the middle
-    let center_of_bricks = 0.0;
-    let left_edge_of_bricks = center_of_bricks - (8 as f32 / 2.0 * SQUARE_SIZE);
-    let bottom_edge_of_bricks = center_of_bricks - (8 as f32 / 2.0 * SQUARE_SIZE);
-
-    let offset_x = left_edge_of_bricks + SQUARE_SIZE / 2.;
-    let offset_y = bottom_edge_of_bricks + SQUARE_SIZE / 2.;
 
 
     // Create Chessboard 8x8
     for row in 0..8 {
         for column in 0..8 {
             let square_position = Vec2::new(
-                offset_x + column as f32 * (SQUARE_SIZE),
-                offset_y + row as f32 * (SQUARE_SIZE),
+                OFFSET + column as f32 * (SQUARE_SIZE),
+                OFFSET + row as f32 * (SQUARE_SIZE),
             );
 
             if (row + column) % 2 != 0 {
@@ -97,21 +93,5 @@ fn create_board(mut commands: Commands, asset_server: Res<AssetServer>) {
                 });
             }
         }
-    }
-
-    // Adding pieces (random png for now) only temporary here
-
-    for i in 0..8 {
-    let king = commands
-    .spawn_bundle(SpriteBundle {
-        texture: asset_server.load("king.png"),
-        transform: Transform {
-            translation: Vec3::new(offset_x + i as f32 * SQUARE_SIZE, offset_y + SQUARE_SIZE, 0.0),
-            scale: Vec3::new(0.08, 0.08, 1.0),
-            ..default()
-        },
-        ..default()
-    })
-    .id();
     }
 }

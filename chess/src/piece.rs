@@ -1,14 +1,53 @@
-use bevy::{prelude::*, ecs::entity::Entities};
+use std::f32::consts::PI;
+
+use bevy::{prelude::*, ecs::entity::Entities,  input::mouse::{MouseMotion}};
 
 pub struct PiecePlugin;
 
 impl Plugin for PiecePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(print_mouse_events_system);
+        app.add_system(Piece::move_system)
+        .add_startup_system(spawn_pieces);
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+fn spawn_pieces(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>
+) {
+
+    // Spawning white pawns
+    for i in 0..8 {
+        commands
+        .spawn_bundle(SpriteBundle {
+            texture: asset_server.load("king.png"),
+            transform: Transform {
+                translation: Vec3::new(super::OFFSET + i as f32 * super::SQUARE_SIZE, super::OFFSET + super::SQUARE_SIZE, 0.0),
+                scale: Vec3::new(0.08, 0.08, 1.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Piece::white(Kind::Pawn, (super::OFFSET + i as f32 * super::SQUARE_SIZE, super::OFFSET + super::SQUARE_SIZE * 6.0)));
+    }
+
+    // Spawning black pawns
+    for i in 0..8 {
+        commands
+        .spawn_bundle(SpriteBundle {
+            texture: asset_server.load("king.png"),
+            transform: Transform {
+                translation: Vec3::new(super::OFFSET + i as f32 * super::SQUARE_SIZE, super::OFFSET + super::SQUARE_SIZE * 6.0, 0.0),
+                scale: Vec3::new(0.08, 0.08, 1.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Piece::black(Kind::Pawn, (super::OFFSET + i as f32 * super::SQUARE_SIZE, super::OFFSET + super::SQUARE_SIZE * 6.0)));
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Kind {
     Queen,
     King,
@@ -18,14 +57,14 @@ pub enum Kind {
     Pawn,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PieceColor {
     Black,
     White,
 }
 
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct Piece {
     kind: Kind,
     color: PieceColor,
@@ -48,32 +87,29 @@ impl Piece {
             position,
         }
     }
-}
 
-fn spawn_pieces(
-    commands: Commands,
-    
-) {
-
-}
-
-fn print_mouse_events_system(
-    mut mouse_button_input: Res<Input<MouseButton>>,
-    mut query: Query<(Entity, &mut Transform, &Piece)>,
-) {
-    let mut direction: f32 = 0.0;
-    let mut piece_transform = query.single_mut();
-
-    if mouse_button_input.pressed(MouseButton::Left) {
-        direction -= 1.0;
+    fn move_system(
+        mut commands: Commands,
+        mut cursor_moved_events: EventReader<CursorMoved>,
+        mut query: Query<(&mut Piece, Entity)>
+    ) {
+        for (mut piece, entity) in query.iter_mut() {
+            for event in cursor_moved_events.iter() {
+                if event.position[0] == piece.position.1 && event.position[1] == piece.position.0 {
+                    match piece.kind {
+                        Kind::Pawn => info!("Pawn"),
+                        Kind::Knight => info!("Knight"),
+                        Kind::Bishop => info!("Bishop"),
+                        Kind::Queen => info!("Queen"),
+                        Kind::King => info!("King"),
+                        _ => info!("{:?}", piece),
+                    }
+                }
+                else {
+                    info!("{:?}", event);
+                    info!("{:?}", piece);
+                }
+            }
+        }
     }
-
-    if mouse_button_input.pressed(MouseButton::Right) {
-        direction += 1.0;
-    }
-
-    let new_piece_position = piece_transform.translation.x + direction;
-
-
-    piece_transform.translation.x = new_piece_position.clamp(-(super::SQUARE_SIZE * 8.0) / 2.0, (super::SQUARE_SIZE * 8.0) / 2.0);
 }
