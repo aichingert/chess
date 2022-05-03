@@ -67,7 +67,7 @@
 			"group": "build",
 			"label": "rust: cargo check"
 		},
-		{
+		{ 
 			"type": "cargo",
 			"command": "test",
 			"problemMatcher": [
