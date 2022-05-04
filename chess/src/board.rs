@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::piece::*;
 
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
 const LIGTH_BROWN_COLOR: Color = Color::rgb(240.0 / 255.0, 217.0 / 255.0, 181.0 / 255.0);
@@ -13,7 +14,9 @@ impl Plugin for BoardPlugin {
 }
 
 #[derive(Component)]
-pub struct Square;
+pub struct Square {
+    pos: (u8, u8),
+}
 
 fn create_board(mut commands: Commands) {
     // Cameras
@@ -33,7 +36,9 @@ fn create_board(mut commands: Commands) {
                 // Insert brown square
                 commands
                 .spawn()
-                .insert(Square)
+                .insert(Square {
+                    pos: (row as u8, column as u8)
+                })
                 .insert_bundle(SpriteBundle {
                     sprite: Sprite {
                         color: LIGTH_BROWN_COLOR,
@@ -51,7 +56,9 @@ fn create_board(mut commands: Commands) {
                 // Insert white square 
                 commands
                 .spawn()
-                .insert(Square)
+                .insert(Square {
+                    pos: (row as u8, column as u8)
+                })
                 .insert_bundle(SpriteBundle {
                     sprite: Sprite {
                         color: BROWN_COLOR,
