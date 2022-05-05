@@ -13,8 +13,8 @@ const SQUARE_SIZE: f32 = 75.0;
 mod piece;
 mod board;
 
-use piece::*;
-use board::*;
+use piece::PiecePlugin;
+use board::BoardPlugin;
 
 fn main() {
     App::new()
