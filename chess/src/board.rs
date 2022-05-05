@@ -1,5 +1,6 @@
+use std::os::windows;
+
 use bevy::prelude::*;
-use crate::piece::*;
 
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
 const LIGTH_BROWN_COLOR: Color = Color::rgb(240.0 / 255.0, 217.0 / 255.0, 181.0 / 255.0);
@@ -17,11 +18,13 @@ pub struct Square {
     pos: (i32, i32),
 }
 
-fn create_board(mut commands: Commands) {
+fn create_board(
+    mut commands: Commands
+)   {
+
     // Cameras
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
-
 
     // Create Chessboard 8x8
     for row in 0..8 {
