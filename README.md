@@ -7,9 +7,9 @@
 
 ## Milestones
 
-| Date | Description |
-| --| -----| 
-| 6.5 | Add missing Pieces |
-| 1.6 | Movement system (not even possible move detection just move) |
-| 1.7 | Finished Prototype |
-| 14.7 | Project done |
+| Date | Description | Status |
+| --| -----| ----|
+| 6.5 | Add missing Pieces | finished |
+| 1.6 | Movement system (not even possible move detection just move) | under construction |
+| 1.7 | Finished Prototype | waiting... |
+| 14.7 | Project done | waiting... |
