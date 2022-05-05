@@ -1,11 +1,17 @@
-use bevy::{prelude::*, ecs::{entity::Entities, component::ComponentId},  input::mouse::{MouseMotion}};
+/*
+    delete this shit now
+*/
+
+use bevy::{prelude::*, ecs::{entity::Entities, component::ComponentId, query},  input::mouse::{MouseMotion}};
+use core::time;
+use std::thread::sleep;
 
 pub struct PiecePlugin;
 
 impl Plugin for PiecePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(move_system)
-        .add_startup_system(spawn_pieces);
+        app.add_startup_system(spawn_pieces)
+            .add_system(detection_system);
     }
 }
 
@@ -39,7 +45,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::white(Kind::King, (4, 1)));
+    .insert(Piece::white(Kind::King, (4, 0)));
     
     // spawn white queen
     commands
@@ -52,7 +58,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::white(Kind::Queen, (3, 1)));
+    .insert(Piece::white(Kind::Queen, (3, 0)));
         
     // spawn white bishop left
     commands
@@ -65,7 +71,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::white(Kind::Bishop, (2, 1)));
+    .insert(Piece::white(Kind::Bishop, (2, 0)));
      
     // spawn white bishop right
     commands
@@ -78,7 +84,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::white(Kind::Bishop, (5, 1)));
+    .insert(Piece::white(Kind::Bishop, (5, 0)));
  
     // spawn white knight left
     commands
@@ -91,7 +97,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::white(Kind::Knight, (1, 1)));
+    .insert(Piece::white(Kind::Knight, (1, 0)));
  
     // spawn white knight right
     commands
@@ -104,7 +110,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::white(Kind::Knight, (6, 1)));
+    .insert(Piece::white(Kind::Knight, (6, 0)));
 
     // spawn white rook left
     commands
@@ -117,7 +123,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::white(Kind::Rook, (0, 1)));
+    .insert(Piece::white(Kind::Rook, (0, 0)));
 
     // spawn white rook right
     commands
@@ -130,7 +136,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::white(Kind::Rook, (7, 1)));
+    .insert(Piece::white(Kind::Rook, (7, 0)));
  
  
  
@@ -160,7 +166,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::black(Kind::King, (4, 1)));
+    .insert(Piece::black(Kind::King, (4, 7)));
 
     // spawn black queen
     commands
@@ -173,7 +179,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::black(Kind::Queen, (3, 1)));
+    .insert(Piece::black(Kind::Queen, (3, 7)));
         
     // spawn black bishop left
     commands
@@ -186,7 +192,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::black(Kind::Bishop, (2, 1)));
+    .insert(Piece::black(Kind::Bishop, (2, 7)));
     
     // spawn black bishop right
     commands
@@ -199,7 +205,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::black(Kind::Bishop, (5, 1)));
+    .insert(Piece::black(Kind::Bishop, (5, 7)));
 
     // spawn black knight left
     commands
@@ -212,7 +218,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::black(Kind::Knight, (1, 1)));
+    .insert(Piece::black(Kind::Knight, (1, 7)));
 
     // spawn black knight right
     commands
@@ -225,7 +231,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::black(Kind::Knight, (6, 1)));
+    .insert(Piece::black(Kind::Knight, (6, 7)));
 
     // spawn black rook left
     commands
@@ -238,7 +244,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::black(Kind::Rook, (0, 1)));
+    .insert(Piece::black(Kind::Rook, (0, 7)));
 
     // spawn black rook right
     commands
@@ -251,7 +257,7 @@ fn spawn_pieces(
         },
         ..default()
     })
-    .insert(Piece::black(Kind::Rook, (7, 1)));
+    .insert(Piece::black(Kind::Rook, (7, 7)));
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -297,4 +303,113 @@ impl Piece {
 }
 
 
-fn move_system() {}
+fn detection_system(
+    mouse_button_input: Res<Input<MouseButton>>,
+    piece_query: Query<&Piece>,
+    windows: Res<Windows>,
+) {
+    let window = windows.get_primary().unwrap();
+    if let Some(pos) = window.cursor_position() {
+        let x = pos.x / super::SQUARE_SIZE;
+        let y = pos.y / super::SQUARE_SIZE;
+
+        if mouse_button_input.just_pressed(MouseButton::Left) {
+            //move_system(query, (x as i32, y as i32));
+            if check_if_piece_is_on_position(piece_query, (x as i32, y as i32)) {
+                info!("piece found");
+            } else {
+                info!("no piece there");
+            }
+        }
+    }
+}
+
+fn check_if_piece_is_on_position(
+    query: Query<&Piece>,
+    pressed_pos: (i32, i32)
+) -> bool {
+    let mut is_there_a_piece = false;
+
+    query.for_each( | piece| {
+        if piece.position.0 == pressed_pos.0 && piece.position.1 == pressed_pos.1 {
+            info!("{:?}", piece);
+            is_there_a_piece = true;
+        }
+    });
+
+    is_there_a_piece
+}
+
+fn move_system(
+    mut query: Query<(&mut Transform, &mut Piece)>,
+    position: (i32, i32)
+) {
+    for (mut transform, mut pieces) in query.iter_mut() {
+        let mut x = super::OFFSET;
+        let mut y =super::OFFSET;
+        let mut transforming: bool = false;
+
+        match pieces.color {
+            PieceColor::White => {
+                match pieces.kind {
+                    Kind::Pawn => {
+                        if pieces.position.1 + 1 < 7 {
+                            pieces.position.1 += 1;
+                            y += pieces.position.1 as f32 * super::SQUARE_SIZE;
+                            x += pieces.position.0 as f32 * super::SQUARE_SIZE;
+                            transforming = true;
+                        }
+                    }
+                    Kind::Knight => {
+        
+                    }
+                    Kind::Bishop => {
+        
+                    }
+                    Kind::Rook => {
+        
+                    }
+                    Kind::Queen => {
+        
+                    }
+                    Kind::King => {
+                        
+                    }
+                    _ => {},
+                }
+            }
+            PieceColor::Black => {
+                match pieces.kind {
+                    Kind::Pawn => {
+                        if pieces.position.1 - 1 > 0 {
+                            pieces.position.1 -= 1;
+                            y += pieces.position.1 as f32 * super::SQUARE_SIZE;
+                            x += pieces.position.0 as f32 * super::SQUARE_SIZE;
+                            transforming = true;
+                        }
+                    }
+                    Kind::Knight => {
+        
+                    }
+                    Kind::Bishop => {
+        
+                    }
+                    Kind::Rook => {
+        
+                    }
+                    Kind::Queen => {
+        
+                    }
+                    Kind::King => {
+                        
+                    }
+                    _ => {},
+                }
+            }
+        }
+
+        if transforming {
+            transform.translation = Vec3::new(x, y, 0.0);
+        }
+    }
+}
