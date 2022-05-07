@@ -2,9 +2,7 @@
     delete this shit now
 */
 
-use bevy::{prelude::*, ecs::{entity::Entities, component::ComponentId, query},  input::mouse::{MouseMotion}};
-use core::time;
-use std::thread::sleep;
+use bevy::prelude::*;
 
 pub struct PiecePlugin;
 
@@ -268,6 +266,7 @@ pub enum Kind {
     Bishop,
     Knight,
     Pawn,
+    NoPiece,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -292,7 +291,7 @@ impl Piece {
             position,
         }
     }
-
+    
     fn black(kind: Kind, position: (i32, i32)) -> Piece {
         Piece {
             kind,
@@ -302,28 +301,50 @@ impl Piece {
     }
 }
 
-
 fn detection_system(
-    mouse_button_input: Res<Input<MouseButton>>,
-    piece_query: Query<&Piece>,
+    mut mouse_button_input: ResMut<Input<MouseButton>>,
+    mut piece_query: Query<(&mut Transform, &mut Piece)>,
     windows: Res<Windows>,
 ) {
     let window = windows.get_primary().unwrap();
     if let Some(pos) = window.cursor_position() {
-        let x = pos.x / super::SQUARE_SIZE;
-        let y = pos.y / super::SQUARE_SIZE;
 
-        if mouse_button_input.just_pressed(MouseButton::Left) {
-            //move_system(query, (x as i32, y as i32));
-            if check_if_piece_is_on_position(piece_query, (x as i32, y as i32)) {
-                info!("piece found");
-            } else {
-                info!("no piece there");
-            }
+        let x: i32 = (pos.x / super::SQUARE_SIZE) as i32;
+        let y: i32 = (pos.y / super::SQUARE_SIZE) as i32;
+
+        let mut transform_x = super::OFFSET;
+        let mut transform_y = super::OFFSET;
+
+        let mut pieces_on_the_board: Vec<&Piece> = Vec::new();
+
+        if mouse_button_input.just_released(MouseButton::Left) {
+            piece_query.for_each( | (trans, piece) | {
+                pieces_on_the_board.push(piece.clone());
+            });
+
+
+            piece_query.for_each_mut( | (mut transform_piece,mut piece) | {
+                if piece.position.0 == x && piece.position.1 == y {
+                    if let Some(new_pos) = window.cursor_position() {
+
+                        let piece_x: i32 = (pos.x / super::SQUARE_SIZE) as i32;
+                        let piece_y: i32 = (pos.y / super::SQUARE_SIZE) as i32;
+
+                        piece.position.0 = piece_x;
+                        piece.position.1 = piece_y + 1;
+
+                        transform_x += piece.position.0 as f32 * super::SQUARE_SIZE;
+                        transform_y += piece.position.1 as f32 * super::SQUARE_SIZE;
+                        
+                        transform_piece.translation = Vec3::new(transform_x, transform_y, 1.0);
+                    }
+                }
+            });
         }
     }
 }
 
+/*
 fn check_if_piece_is_on_position(
     query: Query<&Piece>,
     pressed_pos: (i32, i32)
@@ -342,7 +363,6 @@ fn check_if_piece_is_on_position(
 
 fn move_system(
     mut query: Query<(&mut Transform, &mut Piece)>,
-    position: (i32, i32)
 ) {
     for (mut transform, mut pieces) in query.iter_mut() {
         let mut x = super::OFFSET;
@@ -413,3 +433,5 @@ fn move_system(
         }
     }
 }
+
+*/
