@@ -1,5 +1,9 @@
 # Chess-Clone
 ## Bevy
+- is a game engine for rust
+- not recommended for bigger projects because not finisehd
+
+## Game features
 - Has square highlighting where the detected piece can move
 - possible move detection
 - checkmate and stalemate implementation
