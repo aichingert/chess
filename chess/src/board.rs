@@ -1,5 +1,3 @@
-use std::os::windows;
-
 use bevy::prelude::*;
 
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
@@ -14,9 +12,7 @@ impl Plugin for BoardPlugin {
 }
 
 #[derive(Component)]
-pub struct Square {
-    pos: (i32, i32),
-}
+pub struct Square;
 
 fn create_board(
     mut commands: Commands
@@ -38,9 +34,7 @@ fn create_board(
                 // Insert brown square
                 commands
                 .spawn()
-                .insert(Square {
-                    pos: (row, column)
-                })
+                .insert(Square)
                 .insert_bundle(SpriteBundle {
                     sprite: Sprite {
                         color: LIGTH_BROWN_COLOR,
@@ -58,9 +52,7 @@ fn create_board(
                 // Insert white square 
                 commands
                 .spawn()
-                .insert(Square {
-                    pos: (row, column)
-                })
+                .insert(Square)
                 .insert_bundle(SpriteBundle {
                     sprite: Sprite {
                         color: BROWN_COLOR,
