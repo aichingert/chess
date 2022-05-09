@@ -275,12 +275,17 @@ pub enum PieceColor {
     White,
 }
 
+#[derive(Component, Debug, Clone)]
+struct Move {
+    position: (i32, i32),
+}
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Clone)]
 pub struct Piece {
     kind: Kind,
     color: PieceColor,
     position: (i32, i32),
+    moves: Vec<Move>,
 }
 
 impl Piece {
@@ -289,6 +294,7 @@ impl Piece {
             kind,
             color: PieceColor::White,
             position,
+            moves: Vec::new(),
         }
     }
     
@@ -297,6 +303,70 @@ impl Piece {
             kind,
             color: PieceColor::Black,
             position,
+            moves: Vec::new(),
+        }
+    }
+
+    pub fn check_possible_moves(&mut self, pieces: Vec<Piece>) {
+        self.moves.clear();
+        let mut possible_moves: Vec<Move> = Vec::new(); 
+    
+        let x_position = self.position.0;
+        let y_position = self.position.1;
+    
+        match self.color {
+            PieceColor::White => {
+                match self.kind {
+                    Kind::Pawn => {
+                        if y_position == 1 {
+    
+                        } else {
+                            if y_position == 7 {
+                                self.promotion(Kind::Queen);
+                            }
+    
+                            let mut pawn_blocked = false;
+    
+                            for p in &pieces {
+                                if y_position + 1 == p.position.1 {
+                                    true;
+                                }
+                            }
+    
+                            if !pawn_blocked {
+                                possible_moves.push(Move {position: (x_position, y_position + 1)});
+                            }
+                        }
+                    },
+                    Kind::Knight => {},
+                    Kind::Bishop => {},
+                    Kind::Rook => {},
+                    Kind::Queen => {},
+                    Kind::King => {},
+                    _ => {}
+                }
+            },
+            PieceColor::Black => {
+                match self.kind {
+                    Kind::Pawn => {
+                        
+                    },
+                    Kind::Knight => {},
+                    Kind::Bishop => {},
+                    Kind::Rook => {},
+                    Kind::Queen => {},
+                    Kind::King => {},
+                    _ => {}
+                }
+            },
+        }
+    }
+    
+    pub fn promotion(&mut self, to: Kind) {
+        if self.kind == Kind::Pawn {
+            // Issue: Add => piece despawn and respawning new piece
+    
+            self.kind = to;
         }
     }
 }
@@ -318,8 +388,8 @@ fn detection_system(
         let mut pieces_on_the_board: Vec<&Piece> = Vec::new();
 
         if mouse_button_input.just_released(MouseButton::Left) {
-            piece_query.for_each( | (trans, piece) | {
-                pieces_on_the_board.push(piece.clone());
+            piece_query.for_each( | query_info | {
+                pieces_on_the_board.push(&query_info.1.clone());
             });
 
 
@@ -343,95 +413,3 @@ fn detection_system(
         }
     }
 }
-
-/*
-fn check_if_piece_is_on_position(
-    query: Query<&Piece>,
-    pressed_pos: (i32, i32)
-) -> bool {
-    let mut is_there_a_piece = false;
-
-    query.for_each( | piece| {
-        if piece.position.0 == pressed_pos.0 && piece.position.1 == pressed_pos.1 {
-            info!("{:?}", piece);
-            is_there_a_piece = true;
-        }
-    });
-
-    is_there_a_piece
-}
-
-fn move_system(
-    mut query: Query<(&mut Transform, &mut Piece)>,
-) {
-    for (mut transform, mut pieces) in query.iter_mut() {
-        let mut x = super::OFFSET;
-        let mut y =super::OFFSET;
-        let mut transforming: bool = false;
-
-        match pieces.color {
-            PieceColor::White => {
-                match pieces.kind {
-                    Kind::Pawn => {
-                        if pieces.position.1 + 1 < 7 {
-                            pieces.position.1 += 1;
-                            y += pieces.position.1 as f32 * super::SQUARE_SIZE;
-                            x += pieces.position.0 as f32 * super::SQUARE_SIZE;
-                            transforming = true;
-                        }
-                    }
-                    Kind::Knight => {
-        
-                    }
-                    Kind::Bishop => {
-        
-                    }
-                    Kind::Rook => {
-        
-                    }
-                    Kind::Queen => {
-        
-                    }
-                    Kind::King => {
-                        
-                    }
-                    _ => {},
-                }
-            }
-            PieceColor::Black => {
-                match pieces.kind {
-                    Kind::Pawn => {
-                        if pieces.position.1 - 1 > 0 {
-                            pieces.position.1 -= 1;
-                            y += pieces.position.1 as f32 * super::SQUARE_SIZE;
-                            x += pieces.position.0 as f32 * super::SQUARE_SIZE;
-                            transforming = true;
-                        }
-                    }
-                    Kind::Knight => {
-        
-                    }
-                    Kind::Bishop => {
-        
-                    }
-                    Kind::Rook => {
-        
-                    }
-                    Kind::Queen => {
-        
-                    }
-                    Kind::King => {
-                        
-                    }
-                    _ => {},
-                }
-            }
-        }
-
-        if transforming {
-            transform.translation = Vec3::new(x, y, 0.0);
-        }
-    }
-}
-
-*/
