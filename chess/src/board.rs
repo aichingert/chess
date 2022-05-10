@@ -69,3 +69,10 @@ fn create_board(
         }
     }
 }
+
+fn highlight_possible_moves(
+    mut commands: Commands,
+    
+) {
+
+}
