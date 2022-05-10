@@ -275,11 +275,6 @@ pub enum PieceColor {
     White,
 }
 
-#[derive(Component, Debug, Clone, Copy)]
-struct Move {
-    position: (i32, i32),
-}
-
 #[derive(Component, Debug, Clone)]
 pub struct Piece {
     kind: Kind,
@@ -294,6 +289,34 @@ enum EnPassantStates {
     Ready,
     Waiting,
     Done,
+}
+
+fn in_check(pieces: Vec<Piece>, has_color: PieceColor) -> bool {
+    let mut king_position = (-1, -1);
+
+    for p in pieces.clone() {
+        match p.color {
+            has_color => {
+                match p.kind {
+                    Kind::King => {
+                        king_position = p.position.clone();
+                    },
+                    _ => {}
+                }
+            },
+            _ => {}
+        }
+    }
+
+    for p in pieces.clone() {
+        for possible_move in p.moves {
+            if possible_move == king_position {
+                return true;
+            }
+        }
+    }
+
+    false
 }
 
 impl Piece {
@@ -350,12 +373,13 @@ impl Piece {
                         }
                     
                         pawn_blocked = false;
-                        let mut pos_mov: (i32, i32) = (-1, -1);
+                        let mut pos_mov: Vec<(i32, i32)> = Vec::new();
 
                         for p in &pieces {
                             if (y_position + 1) == p.position.1 && x_position == p.position.0 || (y_position + 1) > 7 {
                                 pawn_blocked = true;
                             }
+                            
                             match p.color {
                                 PieceColor::Black => {
                                     match p.kind {
@@ -364,11 +388,11 @@ impl Piece {
                                                 EnPassantStates::Ready => {
                                                     // En passant check, possbile issue is that it can take 2 pieces at once
                                                     if y_position == p.position.1 && x_position - 1 == p.position.0 && (x_position - 1) >= 0 {
-                                                        pos_mov = (x_position - 1, y_position + 1);
+                                                        pos_mov.push((x_position - 1, y_position + 1));
                                                     }
 
                                                     if y_position == p.position.1 && x_position + 1 == p.position.0 && (x_position + 1) <= 7 {
-                                                        pos_mov = (x_position + 1, y_position + 1);
+                                                        pos_mov.push((x_position + 1, y_position + 1));
                                                     }
 
                                                     info!("{:?}", p);
@@ -378,21 +402,34 @@ impl Piece {
                                         },
                                         _ => {}
                                     }
+
+                                    if (y_position + 1) == p.position.1 && (x_position + 1) == p.position.0 
+                                    && ( (y_position + 1) < 8 || (x_position + 1) < 8 ) {
+                                        pos_mov.push((y_position + 1, x_position + 1))
+                                    }
+        
+                                    if (y_position + 1) == p.position.1 && (x_position - 1) == p.position.0 
+                                        && ( (y_position + 1) < 8 || (x_position - 1) > -1 ) {
+                                        pos_mov.push((y_position + 1, x_position - 1))
+                                    }
                                 },
                                 _ => {}
                             }
                         }
 
                         if !pawn_blocked {
-                            if pos_mov.0 >= 0 {
-                                possible_moves.push(pos_mov);
+                            for mv in pos_mov {
+                                possible_moves.push(mv.clone());
                             }
+                            
                             possible_moves.push((x_position, y_position + 1));
                         }
 
                         self.moves = possible_moves.clone();
                     },
-                    Kind::Knight => {},
+                    Kind::Knight => {
+
+                    },
                     Kind::Bishop => {},
                     Kind::Rook => {},
                     Kind::Queen => {},
@@ -424,9 +461,9 @@ impl Piece {
                                 possible_moves.push((x_position, y_position - 2));
                             }
                         }
-                    
+
                         pawn_blocked = false;
-                        let mut pos_mov: (i32, i32) = (-1, -1);
+                        let mut pos_mov: Vec<(i32, i32)> = Vec::new();
 
                         for p in &pieces {
                             if (y_position - 1) == p.position.1 && x_position == p.position.0 || (y_position - 1) < 0 {
@@ -440,11 +477,11 @@ impl Piece {
                                             match p.en_passant {
                                                 EnPassantStates::Ready => {
                                                     if y_position == p.position.1 && x_position - 1 == p.position.0 && (x_position - 1) >= 0 {
-                                                        pos_mov = (x_position - 1, y_position - 1);
+                                                        pos_mov.push((x_position - 1, y_position - 1));
                                                     }
                 
                                                     if y_position == p.position.1 && x_position + 1 == p.position.0 && (x_position + 1) <= 7 {
-                                                        pos_mov = (x_position + 1, y_position - 1);
+                                                        pos_mov.push((x_position + 1, y_position - 1));
                                                     }
                                                 },
                                                 _ => {}
@@ -452,14 +489,24 @@ impl Piece {
                                         },
                                         _ => {}
                                     }
+
+                                    if (y_position - 1) == p.position.1 && (x_position + 1) == p.position.0 
+                                    && ( (y_position - 1) < -1 || (x_position + 1) < 8 ) {
+                                        pos_mov.push((y_position - 1, x_position + 1))
+                                    }
+        
+                                    if (y_position - 1) == p.position.1 && (x_position - 1) == p.position.0 
+                                        && ( (y_position - 1) < -1 || (x_position - 1) < -1 ) {
+                                        pos_mov.push((y_position + 1, x_position - 1))
+                                    }
                                 },
                                 _ => {}
                             }
                         }
 
                         if !pawn_blocked {
-                            if pos_mov.1 >= 0 {
-                                possible_moves.push(pos_mov);
+                            for pm in pos_mov {
+                                possible_moves.push(pm);
                             }
                             possible_moves.push((x_position, y_position - 1));
                         }
@@ -475,6 +522,14 @@ impl Piece {
                 }
             },
         }
+
+        if in_check(pieces.clone(), self.color) {
+
+        }
+    }
+
+    fn block_checks() {
+
     }
     
     fn promotion(&mut self, to: Kind) {
@@ -511,9 +566,6 @@ fn detection_system(
                     piece.check_possible_moves(pieces_on_the_board.clone());
 
                     let postitions = piece.moves.clone();
-
-                    let piece_x: i32 = (pos.x / super::SQUARE_SIZE) as i32;
-                    let piece_y: i32 = (pos.y / super::SQUARE_SIZE) as i32;
 
                     if postitions.len() > 0 {
                         transform_x += postitions[0].0 as f32 * super::SQUARE_SIZE;
