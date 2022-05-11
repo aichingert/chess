@@ -12,6 +12,7 @@ const SQUARE_SIZE: f32 = 75.0;
 
 mod piece;
 mod board;
+mod logic;
 
 use piece::PiecePlugin;
 use board::BoardPlugin;
