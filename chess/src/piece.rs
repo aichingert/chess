@@ -277,21 +277,24 @@ pub enum PieceColor {
 
 #[derive(Component, Debug, Clone)]
 pub struct Piece {
-    kind: Kind,
-    color: PieceColor,
-    position: (i32, i32),
-    moves: Vec<(i32, i32)>,
-    en_passant: EnPassantStates,
+    pub kind: Kind,
+    pub color: PieceColor,
+    pub position: (i32, i32),
+    pub moves: Vec<(i32, i32)>,
+    pub en_passant: EnPassantStates,
 }
 
+#[derive(Component)]
+pub struct Point;
+
 #[derive(Component, Debug, Clone)]
-enum EnPassantStates {
+pub enum EnPassantStates {
     Ready,
     Waiting,
     Done,
 }
 
-fn in_check(pieces: Vec<Piece>, has_color: PieceColor) -> bool {
+pub fn in_check(pieces: Vec<Piece>, has_color: PieceColor) -> bool {
     let mut king_position = (-1, -1);
 
     for p in pieces.clone() {
@@ -339,200 +342,8 @@ impl Piece {
             en_passant: en_passant_state,
         }
     }
-
-    fn check_possible_moves(&mut self, pieces: Vec<Piece>) {
-        self.moves.clear();
-        let mut possible_moves: Vec<(i32, i32)> = Vec::new(); 
     
-        let x_position = self.position.0;
-        let y_position = self.position.1;
-    
-        match self.color {
-            PieceColor::White => {
-                match self.kind {
-                    Kind::Pawn => {
-                        if y_position == 7 {
-                            self.promotion(Kind::Queen);
-                            return;
-                        }
-                        let mut pawn_blocked = false;
-
-                        if y_position == 1 {
-                            for p in &pieces {
-                                for i in 1..3 {
-                                    if (y_position + i) == p.position.1 && x_position == p.position.0 {
-                                        pawn_blocked = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if !pawn_blocked {
-                                possible_moves.push((x_position, y_position + 2));
-                            }
-                        }
-                    
-                        pawn_blocked = false;
-                        let mut pos_mov: Vec<(i32, i32)> = Vec::new();
-
-                        for p in &pieces {
-                            if (y_position + 1) == p.position.1 && x_position == p.position.0 || (y_position + 1) > 7 {
-                                pawn_blocked = true;
-                            }
-                            
-                            match p.color {
-                                PieceColor::Black => {
-                                    match p.kind {
-                                        Kind::Pawn => {
-                                            match p.en_passant {
-                                                EnPassantStates::Ready => {
-                                                    // En passant check, possbile issue is that it can take 2 pieces at once
-                                                    if y_position == p.position.1 && x_position - 1 == p.position.0 && (x_position - 1) >= 0 {
-                                                        pos_mov.push((x_position - 1, y_position + 1));
-                                                    }
-
-                                                    if y_position == p.position.1 && x_position + 1 == p.position.0 && (x_position + 1) <= 7 {
-                                                        pos_mov.push((x_position + 1, y_position + 1));
-                                                    }
-
-                                                    info!("{:?}", p);
-                                                },
-                                                _ => {}
-                                            }
-                                        },
-                                        _ => {}
-                                    }
-
-                                    if (y_position + 1) == p.position.1 && (x_position + 1) == p.position.0 
-                                    && ( (y_position + 1) < 8 || (x_position + 1) < 8 ) {
-                                        pos_mov.push((y_position + 1, x_position + 1))
-                                    }
-        
-                                    if (y_position + 1) == p.position.1 && (x_position - 1) == p.position.0 
-                                        && ( (y_position + 1) < 8 || (x_position - 1) > -1 ) {
-                                        pos_mov.push((y_position + 1, x_position - 1))
-                                    }
-                                },
-                                _ => {}
-                            }
-                        }
-
-                        if !pawn_blocked {
-                            for mv in pos_mov {
-                                possible_moves.push(mv.clone());
-                            }
-                            
-                            possible_moves.push((x_position, y_position + 1));
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Knight => {
-
-                    },
-                    Kind::Bishop => {},
-                    Kind::Rook => {},
-                    Kind::Queen => {},
-                    Kind::King => {},
-                    _ => {}
-                }
-            },
-            PieceColor::Black => {
-                match self.kind {
-                    Kind::Pawn => {
-                        if y_position == 0 {
-                            self.promotion(Kind::Queen);
-                            return;
-                        }
-
-                        let mut pawn_blocked = false;
-
-                        if y_position == 6 {
-                            for p in &pieces {
-                                for i in 1..3 {
-                                    if (y_position - i) == p.position.1 && x_position == p.position.0 {
-                                        pawn_blocked = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if !pawn_blocked {
-                                possible_moves.push((x_position, y_position - 2));
-                            }
-                        }
-
-                        pawn_blocked = false;
-                        let mut pos_mov: Vec<(i32, i32)> = Vec::new();
-
-                        for p in &pieces {
-                            if (y_position - 1) == p.position.1 && x_position == p.position.0 || (y_position - 1) < 0 {
-                                pawn_blocked = true;
-                            }
-
-                            match p.color {
-                                PieceColor::White => {
-                                    match p.kind {
-                                        Kind::Pawn => {
-                                            match p.en_passant {
-                                                EnPassantStates::Ready => {
-                                                    if y_position == p.position.1 && x_position - 1 == p.position.0 && (x_position - 1) >= 0 {
-                                                        pos_mov.push((x_position - 1, y_position - 1));
-                                                    }
-                
-                                                    if y_position == p.position.1 && x_position + 1 == p.position.0 && (x_position + 1) <= 7 {
-                                                        pos_mov.push((x_position + 1, y_position - 1));
-                                                    }
-                                                },
-                                                _ => {}
-                                            }
-                                        },
-                                        _ => {}
-                                    }
-
-                                    if (y_position - 1) == p.position.1 && (x_position + 1) == p.position.0 
-                                    && ( (y_position - 1) < -1 || (x_position + 1) < 8 ) {
-                                        pos_mov.push((y_position - 1, x_position + 1))
-                                    }
-        
-                                    if (y_position - 1) == p.position.1 && (x_position - 1) == p.position.0 
-                                        && ( (y_position - 1) < -1 || (x_position - 1) < -1 ) {
-                                        pos_mov.push((y_position + 1, x_position - 1))
-                                    }
-                                },
-                                _ => {}
-                            }
-                        }
-
-                        if !pawn_blocked {
-                            for pm in pos_mov {
-                                possible_moves.push(pm);
-                            }
-                            possible_moves.push((x_position, y_position - 1));
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Knight => {},
-                    Kind::Bishop => {},
-                    Kind::Rook => {},
-                    Kind::Queen => {},
-                    Kind::King => {},
-                    _ => {}
-                }
-            },
-        }
-
-        if in_check(pieces.clone(), self.color) {
-
-        }
-    }
-
-    fn block_checks() {
-
-    }
-    
-    fn promotion(&mut self, to: Kind) {
+    pub fn promotion(&mut self, to: Kind) {
         if self.kind == Kind::Pawn {
             // Issue: Add => piece despawn and respawning new piece
     
@@ -542,9 +353,10 @@ impl Piece {
 }
 
 fn detection_system(
-    mut mouse_button_input: ResMut<Input<MouseButton>>,
+    mouse_button_input: ResMut<Input<MouseButton>>,
     mut piece_query: Query<(&mut Transform, &mut Piece)>,
     windows: Res<Windows>,
+    mut commands: Commands
 ) {
     let window = windows.get_primary().unwrap();
     if let Some(pos) = window.cursor_position() {
@@ -563,7 +375,7 @@ fn detection_system(
 
             piece_query.for_each_mut( | (mut transform_piece,mut piece) | {
                 if piece.position.0 == x && piece.position.1 == y {
-                    piece.check_possible_moves(pieces_on_the_board.clone());
+                    piece.calculate_pseudo_legal_moves(pieces_on_the_board.clone());
 
                     let postitions = piece.moves.clone();
 
@@ -578,23 +390,42 @@ fn detection_system(
                         
                         info!("{:?}", postitions);
                     }
+                }
+            });
+        }
 
-                    /* code used to transform piece 1 square up
+        if mouse_button_input.just_pressed(MouseButton::Right) {
+            piece_query.for_each( | query_info | {
+                pieces_on_the_board.push(query_info.1.clone());
+                
+            });
 
-                    if let Some(new_pos) = window.cursor_position() {
+            piece_query.for_each_mut( | mut transform_and_piece | {
+                if transform_and_piece.1.position.0 == x && transform_and_piece.1.position.1 == y {
+                    transform_and_piece.1.calculate_pseudo_legal_moves(pieces_on_the_board.clone());
+                    let positions = transform_and_piece.1.moves.clone();
 
-                        let piece_x: i32 = (pos.x / super::SQUARE_SIZE) as i32;
-                        let piece_y: i32 = (pos.y / super::SQUARE_SIZE) as i32;
+                    for position in positions {
+                        let point_position = Vec2::new(super::SQUARE_SIZE * position.0 as f32 + super::OFFSET, super::SQUARE_SIZE * position.1 as f32 + super::OFFSET);
 
-                        piece.position.0 = piece_x;
-                        piece.position.1 = piece_y + 1;
+                        info!("{:?}", position);
 
-                        transform_x += piece.position.0 as f32 * super::SQUARE_SIZE;
-                        transform_y += piece.position.1 as f32 * super::SQUARE_SIZE;
-                        
-                        transform_piece.translation = Vec3::new(transform_x, transform_y, 1.0);
+                        commands
+                            .spawn()
+                            .insert(Point)
+                            .insert_bundle( SpriteBundle {
+                                sprite: Sprite {
+                                    color: Color::rgb(255.0, 0.0, 0.0),
+                                    ..default()
+                                },
+                                transform: Transform {
+                                    translation: point_position.extend(0.0),
+                                    scale: Vec3::new(20.0, 20.0, 1.0),
+                                    ..default()
+                                },
+                                ..default()
+                        });
                     }
-                    */
                 }
             });
         }
