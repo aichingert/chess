@@ -85,13 +85,73 @@ impl Piece {
                         self.moves = possible_moves.clone();
                     },
                     Kind::Knight => {
+                        possible_moves.push((x_position + 2, y_position + 1));
+                        possible_moves.push((x_position + 2, y_position - 1));
+                        possible_moves.push((x_position - 2, y_position + 1));
+                        possible_moves.push((x_position - 2, y_position - 1));
+                        possible_moves.push((x_position + 1, y_position + 2));
+                        possible_moves.push((x_position - 1, y_position + 2));
+                        possible_moves.push((x_position + 1, y_position - 2));
+                        possible_moves.push((x_position - 1, y_position - 2));
 
+                        let mut idx: usize;
+                        let mut bad_moves: bool = true;
+
+                        while bad_moves {
+                            bad_moves = false;
+                            idx = 0;
+
+                            for i in 0..possible_moves.len() {
+                                if possible_moves[i].0 < 0 || possible_moves[i].0 > 7 
+                                || possible_moves[i].1 < 0 || possible_moves[i].1 > 7
+                                || check_if_there_is_a_friendly_piece(pieces.clone(), possible_moves[i], PieceColor::White) {
+                                    bad_moves = true;
+                                    idx = i;
+                                    break;
+                                }
+                            }
+
+                            if bad_moves {
+                                possible_moves.remove(idx);
+                            }
+                        }
+
+                        self.moves = possible_moves.clone();
                     },
-                    Kind::Bishop => {},
+                    Kind::Bishop => {
+                        for i in 0..8 {
+                            possible_moves.push((x_position + i, i));
+                            possible_moves.push((x_position - i, i));
+                        }
+
+                        let mut idx: usize;
+                        let mut bad_moves: bool = true;
+                        info!("{:?}", possible_moves);
+
+                        while bad_moves {
+                            bad_moves = false;
+                            idx = 0;
+
+                            for i in 0..possible_moves.len() {
+                                if possible_moves[i].0 < 0 || possible_moves[i].0 > 7 
+                                || possible_moves[i].1 < 0 || possible_moves[i].1 > 7
+                                || check_if_there_is_a_friendly_piece(pieces.clone(), possible_moves[i], PieceColor::White) {
+                                    bad_moves = true;
+                                    idx = i;
+                                    break;
+                                }
+                            }
+
+                            if bad_moves {
+                                possible_moves.remove(idx);
+                            }
+                        }
+
+                        self.moves = possible_moves.clone();
+                    },
                     Kind::Rook => {},
                     Kind::Queen => {},
                     Kind::King => {},
-                    _ => {}
                 }
             },
             PieceColor::Black => {
@@ -166,12 +226,46 @@ impl Piece {
 
                         self.moves = possible_moves.clone();
                     },
-                    Kind::Knight => {},
-                    Kind::Bishop => {},
+                    Kind::Knight => {
+                        possible_moves.push((x_position + 2, y_position + 1));
+                        possible_moves.push((x_position + 2, y_position - 1));
+                        possible_moves.push((x_position - 2, y_position + 1));
+                        possible_moves.push((x_position - 2, y_position - 1));
+                        possible_moves.push((x_position + 1, y_position + 2));
+                        possible_moves.push((x_position - 1, y_position + 2));
+                        possible_moves.push((x_position + 1, y_position - 2));
+                        possible_moves.push((x_position - 1, y_position - 2));
+
+                        let mut idx: usize;
+                        let mut bad_moves: bool = true;
+
+                        while bad_moves {
+                            bad_moves = false;
+                            idx = 0;
+
+                            for i in 0..possible_moves.len() {
+                                if possible_moves[i].0 < 0 || possible_moves[i].0 > 7 
+                                || possible_moves[i].1 < 0 || possible_moves[i].1 > 7
+                                || check_if_there_is_a_friendly_piece(pieces.clone(), possible_moves[i], PieceColor::Black) {
+                                    bad_moves = true;
+                                    idx = i;
+                                    break;
+                                }
+                            }
+
+                            if bad_moves {
+                                possible_moves.remove(idx);
+                            }
+                        }
+
+                        self.moves = possible_moves.clone();
+                    },
+                    Kind::Bishop => {
+
+                    },
                     Kind::Rook => {},
                     Kind::Queen => {},
                     Kind::King => {},
-                    _ => {}
                 }
             },
         }
@@ -180,4 +274,20 @@ impl Piece {
 
         }
     }
+}
+
+fn check_if_there_is_a_friendly_piece(
+    pieces: Vec<Piece>,
+    pseudo_move: (i32, i32),
+    friendly_color: PieceColor,
+) -> bool {
+    for piece in &pieces {
+        if piece.color == friendly_color {
+            if piece.position == pseudo_move {
+                return true;
+            }
+        }
+    }
+
+    false
 }
