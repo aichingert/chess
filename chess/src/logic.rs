@@ -104,7 +104,7 @@ impl Piece {
                             for i in 0..possible_moves.len() {
                                 if possible_moves[i].0 < 0 || possible_moves[i].0 > 7 
                                 || possible_moves[i].1 < 0 || possible_moves[i].1 > 7
-                                || check_if_there_is_a_friendly_piece(pieces.clone(), possible_moves[i], PieceColor::White) {
+                                || is_blocked_friendly(pieces.clone(), possible_moves[i], PieceColor::White) {
                                     bad_moves = true;
                                     idx = i;
                                     break;
@@ -119,31 +119,59 @@ impl Piece {
                         self.moves = possible_moves.clone();
                     },
                     Kind::Bishop => {
-                        for i in 0..8 {
-                            possible_moves.push((x_position + i, i));
-                            possible_moves.push((x_position - i, i));
+                        let mut x_pos: i32 = x_position;
+
+                        for i in y_position+1..8 {
+                            x_pos += 1;
+
+                            if !is_blocked_friendly(pieces.clone(), (x_pos, i) ,PieceColor::White) 
+                            && x_pos < 8 {
+                                possible_moves.push((x_pos, i));
+                            }
+                            else {
+                                break;
+                            }
                         }
 
-                        let mut idx: usize;
-                        let mut bad_moves: bool = true;
-                        info!("{:?}", possible_moves);
+                        x_pos = x_position;
 
-                        while bad_moves {
-                            bad_moves = false;
-                            idx = 0;
+                        for i in y_position+1..8 {
+                            x_pos -= 1;
 
-                            for i in 0..possible_moves.len() {
-                                if possible_moves[i].0 < 0 || possible_moves[i].0 > 7 
-                                || possible_moves[i].1 < 0 || possible_moves[i].1 > 7
-                                || check_if_there_is_a_friendly_piece(pieces.clone(), possible_moves[i], PieceColor::White) {
-                                    bad_moves = true;
-                                    idx = i;
-                                    break;
-                                }
+                            if !is_blocked_friendly(pieces.clone(), (x_pos, i) ,PieceColor::White) 
+                            && x_pos > -1 {
+                                possible_moves.push((x_pos, i));
                             }
+                            else {
+                                break;
+                            }
+                        }
 
-                            if bad_moves {
-                                possible_moves.remove(idx);
+                        x_pos = x_position;
+
+                        for i in 1..y_position {
+                            x_pos += 1;
+
+                            if !is_blocked_friendly(pieces.clone(), (x_pos, y_position + i) ,PieceColor::White) 
+                            && x_pos < 8 {
+                                possible_moves.push((x_pos, i));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        x_pos = x_position;
+
+                        for i in 1..y_position {
+                            x_pos -= 1;
+
+                            if !is_blocked_friendly(pieces.clone(), (x_pos, y_position - i) ,PieceColor::White) 
+                            && x_pos < 8 {
+                                possible_moves.push((x_pos, i));
+                            }
+                            else {
+                                break;
                             }
                         }
 
@@ -246,7 +274,7 @@ impl Piece {
                             for i in 0..possible_moves.len() {
                                 if possible_moves[i].0 < 0 || possible_moves[i].0 > 7 
                                 || possible_moves[i].1 < 0 || possible_moves[i].1 > 7
-                                || check_if_there_is_a_friendly_piece(pieces.clone(), possible_moves[i], PieceColor::Black) {
+                                || is_blocked_friendly(pieces.clone(), possible_moves[i], PieceColor::Black) {
                                     bad_moves = true;
                                     idx = i;
                                     break;
@@ -276,7 +304,7 @@ impl Piece {
     }
 }
 
-fn check_if_there_is_a_friendly_piece(
+fn is_blocked_friendly(
     pieces: Vec<Piece>,
     pseudo_move: (i32, i32),
     friendly_color: PieceColor,
@@ -284,6 +312,7 @@ fn check_if_there_is_a_friendly_piece(
     for piece in &pieces {
         if piece.color == friendly_color {
             if piece.position == pseudo_move {
+                info!("Cock blocked by {:?}, {:?}", piece, pseudo_move);
                 return true;
             }
         }
