@@ -266,7 +266,6 @@ pub enum Kind {
     Bishop,
     Knight,
     Pawn,
-    NoPiece,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
