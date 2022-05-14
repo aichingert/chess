@@ -296,6 +296,29 @@ pub enum EnPassantStates {
     Done,
 }
 
+// Turn struct has the current color that has the move
+pub struct Turn {
+    color_to_move: PieceColor,
+}
+
+// has the change function after move the turn changes to the enemy color
+// white => black
+// black => white
+impl Turn {
+    fn change(&mut self) {
+        match self.color_to_move {
+            PieceColor::White => {
+                self.color_to_move = PieceColor::Black;
+            },
+            PieceColor::Black => {
+                self.color_to_move = PieceColor::White;
+            },
+        }
+    }
+}
+
+// Implements the constructors for the a white piece and the black piece
+// also the function promotion => which promotes a pawn to any piece you want, except a pawn again and a king
 impl Piece {
     fn white(kind: Kind, position: (i32, i32), en_passant_state: EnPassantStates) -> Piece {
         Piece {
@@ -326,6 +349,8 @@ impl Piece {
     }
 }
 
+// Is detecting if the player pressed on a piece and calculates the possible moves for it.
+// After that it is going to highlight the possible moves as well
 fn detection_system(
     mouse_button_input: ResMut<Input<MouseButton>>,
     mut piece_query: Query<(&mut Transform, &mut Piece)>,
@@ -342,6 +367,7 @@ fn detection_system(
 
         let mut pieces_on_the_board: Vec<Piece> = Vec::new();
 
+        // Here is the calculation and it moves it automaticaly to the first possible move
         if mouse_button_input.just_released(MouseButton::Left) {
             piece_query.for_each( | query_info | {
                 pieces_on_the_board.push(query_info.1.clone());
@@ -368,6 +394,7 @@ fn detection_system(
             });
         }
 
+        // Here is the piece highlighting with right click (for now) => puts a red dot on the squares it can move
         if mouse_button_input.just_pressed(MouseButton::Right) {
             piece_query.for_each( | query_info | {
                 pieces_on_the_board.push(query_info.1.clone());
