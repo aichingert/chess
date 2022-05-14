@@ -274,6 +274,7 @@ pub enum PieceColor {
     White,
 }
 
+// Piece struct which stores the en_passant state for every piece but is only used for pawns
 #[derive(Component, Debug, Clone)]
 pub struct Piece {
     pub kind: Kind,
@@ -283,42 +284,16 @@ pub struct Piece {
     pub en_passant: EnPassantStates,
 }
 
+// Point struct used for piece highlighting so you can iterate over the points and remove them after moving
 #[derive(Component)]
 pub struct Point;
 
+// The en passant states for the logic system, so you can check if you can take a piece with en passant
 #[derive(Component, Debug, Clone)]
 pub enum EnPassantStates {
     Ready,
     Waiting,
     Done,
-}
-
-pub fn in_check(pieces: Vec<Piece>, has_color: PieceColor) -> bool {
-    let mut king_position = (-1, -1);
-
-    for p in pieces.clone() {
-        match p.color {
-            has_color => {
-                match p.kind {
-                    Kind::King => {
-                        king_position = p.position.clone();
-                    },
-                    _ => {}
-                }
-            },
-            _ => {}
-        }
-    }
-
-    for p in pieces.clone() {
-        for possible_move in p.moves {
-            if possible_move == king_position {
-                return true;
-            }
-        }
-    }
-
-    false
 }
 
 impl Piece {

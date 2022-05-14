@@ -451,7 +451,35 @@ fn going_to_be_checked_if_moved(mut pieces: Vec<Piece>, king: Piece, from: (i32,
         piece.calculate_pseudo_legal_moves(piece_positions.clone());
     }
 
-    
+
+
+    false
+}
+
+fn in_check(pieces: Vec<Piece>, has_color: PieceColor) -> bool {
+    let mut king_position = (-1, -1);
+
+    for p in pieces.clone() {
+        match p.color {
+            has_color => {
+                match p.kind {
+                    Kind::King => {
+                        king_position = p.position.clone();
+                    },
+                    _ => {}
+                }
+            },
+            _ => {}
+        }
+    }
+
+    for p in pieces.clone() {
+        for possible_move in p.moves {
+            if possible_move == king_position {
+                return true;
+            }
+        }
+    }
 
     false
 }
