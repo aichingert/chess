@@ -179,28 +179,46 @@ impl Piece {
                     },
                     Kind::Rook => {
                         for i in 0..x_position {
-                            if blocked_by_friendly(pieces.clone(), (x_position - (i + 1), y_position), PieceColor::White) {
-
+                            if blocked_by_friendly(pieces.clone(), (x_position - (i + 1), y_position), PieceColor::White)
+                            && (x_position - (i + 1)) > -1 {
+                                possible_moves.push((x_position - (i + 1), y_position));
+                            }
+                            else {
+                                break;
                             }
                         }
 
                         for i in x_position+1..8 {
-                            if blocked_by_friendly(pieces.clone(), ((x_position + i), y_position), PieceColor::White) {
-
+                            if blocked_by_friendly(pieces.clone(), ((x_position + i), y_position), PieceColor::White) 
+                            && x_position + i < 8 {
+                                possible_moves.push((x_position + i, y_position));
+                            }
+                            else {
+                                break;
                             }
                         }
 
                         for i in 0..y_position {
-                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position - (i + 1))), PieceColor::White) {
-
+                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position - (i + 1))), PieceColor::White) 
+                            && (y_position - (i + 1)) > -1 {
+                                possible_moves.push((x_position, y_position - (i + 1)));
+                            }
+                            else {
+                                break;
                             }
                         }
 
                         for i in y_position+1..8 {
-                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position + i)), PieceColor::White) {
-
+                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position + i)), PieceColor::White)
+                                && x_position + i < 8 {
+                                    possible_moves.push((x_position, y_position + i));
+                            }
+                            else {
+                                break;
                             }
                         }
+
+                        self.moves = possible_moves.clone();
                     },
                     Kind::Queen => {},
                     Kind::King => {},
@@ -313,9 +331,107 @@ impl Piece {
                         self.moves = possible_moves.clone();
                     },
                     Kind::Bishop => {
+                        let mut x_pos: i32 = x_position;
 
+                        for i in y_position+1..8 {
+                            x_pos += 1;
+
+                            if !blocked_by_friendly(pieces.clone(), (x_pos, i) ,PieceColor::Black) 
+                            && x_pos < 8 {
+                                possible_moves.push((x_pos, i));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        x_pos = x_position;
+
+                        for i in y_position+1..8 {
+                            x_pos -= 1;
+
+                            if !blocked_by_friendly(pieces.clone(), (x_pos, i) ,PieceColor::Black) 
+                            && x_pos > -1 {
+                                possible_moves.push((x_pos, i));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        x_pos = x_position;
+
+                        for i in 1..y_position {
+                            x_pos += 1;
+
+                            if !blocked_by_friendly(pieces.clone(), (x_pos, y_position + i) ,PieceColor::Black) 
+                            && x_pos < 8 {
+                                possible_moves.push((x_pos, i));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        x_pos = x_position;
+
+                        for i in 1..y_position {
+                            x_pos -= 1;
+
+                            if !blocked_by_friendly(pieces.clone(), (x_pos, y_position - i) ,PieceColor::Black) 
+                            && x_pos > -1 {
+                                possible_moves.push((x_pos, i));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        self.moves = possible_moves.clone();
                     },
-                    Kind::Rook => {},
+                    Kind::Rook => {
+                        for i in 0..x_position {
+                            if blocked_by_friendly(pieces.clone(), (x_position - (i + 1), y_position), PieceColor::Black)
+                            && (x_position - (i + 1)) > -1 {
+                                possible_moves.push((x_position - (i + 1), y_position));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        for i in x_position+1..8 {
+                            if blocked_by_friendly(pieces.clone(), ((x_position + i), y_position), PieceColor::Black) 
+                            && x_position + i < 8 {
+                                possible_moves.push((x_position + i, y_position));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        for i in 0..y_position {
+                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position - (i + 1))), PieceColor::Black) 
+                            && (y_position - (i + 1)) > -1 {
+                                possible_moves.push((x_position, y_position - (i + 1)));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        for i in y_position+1..8 {
+                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position + i)), PieceColor::Black)
+                                && x_position + i < 8 {
+                                    possible_moves.push((x_position, y_position + i));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        self.moves = possible_moves.clone();
+                    },
                     Kind::Queen => {},
                     Kind::King => {},
                 }
@@ -326,6 +442,18 @@ impl Piece {
 
         }
     }
+}
+
+fn going_to_be_checked_if_moved(mut pieces: Vec<Piece>, king: Piece, from: (i32, i32), to: (i32, i32)) -> bool {
+    let piece_positions = pieces.clone();
+
+    for mut piece in pieces {
+        piece.calculate_pseudo_legal_moves(piece_positions.clone());
+    }
+
+    
+
+    false
 }
 
 fn blocked_by_friendly(
