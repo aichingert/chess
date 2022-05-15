@@ -258,6 +258,10 @@ fn spawn_pieces(
     .insert(Piece::black(Kind::Rook, (7, 7), EnPassantStates::Done));
 }
 
+pub enum GameState {
+    TakePiece,
+} 
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Kind {
     Queen,
@@ -354,6 +358,7 @@ impl Piece {
 fn detection_system(
     mouse_button_input: ResMut<Input<MouseButton>>,
     mut piece_query: Query<(&mut Transform, &mut Piece)>,
+    query: Query<(Entity, &Piece)>,
     windows: Res<Windows>,
     mut commands: Commands
 ) {
@@ -377,8 +382,15 @@ fn detection_system(
                 if piece.position.0 == x && piece.position.1 == y {
                     piece.calculate_pseudo_legal_moves(pieces_on_the_board.clone());
 
+                    
                     let postitions = piece.moves.clone();
 
+                    piece.position.0 = postitions[0].0;
+                    piece.position.1 = postitions[0].1;
+
+
+                    /*
+                    
                     if postitions.len() > 0 {
                         transform_x += postitions[0].0 as f32 * super::SQUARE_SIZE;
                         transform_y += postitions[0].1 as f32 * super::SQUARE_SIZE;
@@ -390,6 +402,10 @@ fn detection_system(
                         
                         info!("{:?}", postitions);
                     }
+
+                    */
+
+
                 }
             });
         }
@@ -431,4 +447,14 @@ fn detection_system(
             });
         }
     }
+}
+
+fn despawn_taken_pieces(
+    mut commands: Commands,
+    query: Query<(Entity, &Piece)>,
+) {
+    query.for_each(|(entity, piece)| {
+
+        commands.entity(entity).despawn_recursive();
+    })
 }
