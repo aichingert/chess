@@ -43,27 +43,6 @@ impl Piece {
                             
                             match p.color {
                                 PieceColor::Black => {
-                                    match p.kind {
-                                        Kind::Pawn => {
-                                            match p.en_passant {
-                                                EnPassantStates::Ready => {
-                                                    // En passant check, possbile issue is that it can take 2 pieces at once
-                                                    if y_position == p.position.1 && x_position - 1 == p.position.0 && (x_position - 1) >= 0 {
-                                                        possible_moves.push((x_position - 1, y_position + 1));
-                                                    }
-
-                                                    if y_position == p.position.1 && x_position + 1 == p.position.0 && (x_position + 1) <= 7 {
-                                                        possible_moves.push((x_position + 1, y_position + 1));
-                                                    }
-
-                                                    info!("{:?}", p);
-                                                },
-                                                _ => {}
-                                            }
-                                        },
-                                        _ => {}
-                                    }
-
                                     if (y_position + 1) == p.position.1 && (x_position + 1) == p.position.0 
                                     && ( (y_position + 1) < 8 || (x_position + 1) < 8 ) {
                                         possible_moves.push((x_position + 1, y_position + 1))
@@ -258,24 +237,6 @@ impl Piece {
 
                             match p.color {
                                 PieceColor::White => {
-                                    match p.kind {
-                                        Kind::Pawn => {
-                                            match p.en_passant {
-                                                EnPassantStates::Ready => {
-                                                    if y_position == p.position.1 && x_position - 1 == p.position.0 && (x_position - 1) >= 0 {
-                                                        possible_moves.push((x_position - 1, y_position - 1));
-                                                    }
-                
-                                                    if y_position == p.position.1 && x_position + 1 == p.position.0 && (x_position + 1) <= 7 {
-                                                        possible_moves.push((x_position + 1, y_position - 1));
-                                                    }
-                                                },
-                                                _ => {}
-                                            }
-                                        },
-                                        _ => {}
-                                    }
-
                                     if (y_position - 1) == p.position.1 && (x_position + 1) == p.position.0 
                                     && ( (y_position - 1) < -1 || (x_position + 1) < 8 ) {
                                         possible_moves.push((x_position + 1, y_position - 1))

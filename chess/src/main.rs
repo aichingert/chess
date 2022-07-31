@@ -7,7 +7,6 @@ use bevy::{prelude::*, window::WindowResizeConstraints};
 
 // Calculate offset because piece is always placed in the middle
 const OFFSET: f32 = (-(8 as f32 / 2.0 * SQUARE_SIZE)) + SQUARE_SIZE / 2.;
-
 const SQUARE_SIZE: f32 = 75.0;
 
 mod piece;
