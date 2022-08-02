@@ -101,10 +101,6 @@ pub struct Piece {
     pub moves: Vec<(i32, i32)>,
 }
 
-// Point struct used for piece highlighting so you can iterate over the points and remove them after moving
-#[derive(Component)]
-pub struct Point;
-
 // Turn struct has the current color that has the move
 pub struct Turn {
     color_to_move: PieceColor,
@@ -166,14 +162,4 @@ fn move_pieces(time: Res<Time>, mut query: Query<(&mut Transform, &Piece)>) {
             transform.translation += direction.normalize() * (time.delta_seconds() * 5.);
         }
     }
-}
-
-fn despawn_taken_pieces(
-    mut commands: Commands,
-    query: Query<(Entity, &Piece)>,
-) {
-    query.for_each(|(entity, piece)| {
-
-        commands.entity(entity).despawn_recursive();
-    })
 }
