@@ -6,8 +6,8 @@ impl Piece {
         self.moves.clear();
         let mut possible_moves: Vec<(i32, i32)> = Vec::new(); 
     
-        let x_position = self.position.0;
-        let y_position = self.position.1;
+        let x_position = self.pos.0;
+        let y_position = self.pos.1;
     
         match self.color {
             PieceColor::White => {
@@ -22,7 +22,7 @@ impl Piece {
                         if y_position == 1 {
                             for p in &pieces {
                                 for i in 1..3 {
-                                    if (y_position + i) == p.position.1 && x_position == p.position.0 {
+                                    if (y_position + i) == p.pos.1 && x_position == p.pos.0 {
                                         pawn_blocked = true;
                                         break;
                                     }
@@ -37,18 +37,18 @@ impl Piece {
                         pawn_blocked = false;
 
                         for p in &pieces {
-                            if (y_position + 1) == p.position.1 && x_position == p.position.0 || (y_position + 1) > 7 {
+                            if (y_position + 1) == p.pos.1 && x_position == p.pos.0 || (y_position + 1) > 7 {
                                 pawn_blocked = true;
                             }
                             
                             match p.color {
                                 PieceColor::Black => {
-                                    if (y_position + 1) == p.position.1 && (x_position + 1) == p.position.0 
+                                    if (y_position + 1) == p.pos.1 && (x_position + 1) == p.pos.0 
                                     && ( (y_position + 1) < 8 || (x_position + 1) < 8 ) {
                                         possible_moves.push((x_position + 1, y_position + 1))
                                     }
         
-                                    if (y_position + 1) == p.position.1 && (x_position - 1) == p.position.0 
+                                    if (y_position + 1) == p.pos.1 && (x_position - 1) == p.pos.0 
                                         && ( (y_position + 1) < 8 || (x_position - 1) > -1 ) {
                                         possible_moves.push((x_position - 1, y_position + 1))
                                     }
@@ -216,7 +216,7 @@ impl Piece {
                         if y_position == 6 {
                             for p in &pieces {
                                 for i in 1..3 {
-                                    if (y_position - i) == p.position.1 && x_position == p.position.0 {
+                                    if (y_position - i) == p.pos.1 && x_position == p.pos.0 {
                                         pawn_blocked = true;
                                         break;
                                     }
@@ -231,18 +231,18 @@ impl Piece {
                         pawn_blocked = false;
 
                         for p in &pieces {
-                            if (y_position - 1) == p.position.1 && x_position == p.position.0 || (y_position - 1) < 0 {
+                            if (y_position - 1) == p.pos.1 && x_position == p.pos.0 || (y_position - 1) < 0 {
                                 pawn_blocked = true;
                             }
 
                             match p.color {
                                 PieceColor::White => {
-                                    if (y_position - 1) == p.position.1 && (x_position + 1) == p.position.0 
+                                    if (y_position - 1) == p.pos.1 && (x_position + 1) == p.pos.0 
                                     && ( (y_position - 1) < -1 || (x_position + 1) < 8 ) {
                                         possible_moves.push((x_position + 1, y_position - 1))
                                     }
         
-                                    if (y_position - 1) == p.position.1 && (x_position - 1) == p.position.0 
+                                    if (y_position - 1) == p.pos.1 && (x_position - 1) == p.pos.0 
                                         && ( (y_position - 1) > -1 || (x_position - 1) > -1 ) {
                                         possible_moves.push((x_position - 1, y_position - 1))
                                     }
@@ -425,7 +425,7 @@ fn in_check(pieces: Vec<Piece>, has_color: PieceColor) -> bool {
             has_color => {
                 match p.kind {
                     Kind::King => {
-                        king_position = p.position.clone();
+                        king_position = p.pos.clone();
                     },
                     _ => {}
                 }
@@ -452,7 +452,7 @@ fn blocked_by_friendly(
 ) -> bool {
     for piece in &pieces {
         if piece.color == friendly_color {
-            if piece.position == pseudo_move {
+            if piece.pos == pseudo_move {
                 info!("Cock blocked by {:?}, {:?}", piece, pseudo_move);
                 return true;
             }
