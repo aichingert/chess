@@ -102,21 +102,24 @@ pub struct Piece {
 }
 
 // Turn struct has the current color that has the move
-pub struct Turn {
-    color_to_move: PieceColor,
-}
+pub struct Turn(pub PieceColor);
 
 // has the change function after move the turn changes to the enemy color
 // white => black
 // black => white
+impl Default for Turn {
+    fn default() -> Self {
+        Self(PieceColor::White)
+    }
+}
 impl Turn {
-    fn change(&mut self) {
-        match self.color_to_move {
+    pub fn change(&mut self) {
+        match self.0 {
             PieceColor::White => {
-                self.color_to_move = PieceColor::Black;
+                self.0 = PieceColor::Black;
             },
             PieceColor::Black => {
-                self.color_to_move = PieceColor::White;
+                self.0 = PieceColor::White;
             },
         }
     }

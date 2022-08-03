@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::piece::Piece;
+use crate::piece::{Piece, Turn};
 
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
 const LIGTH_BROWN_COLOR: Color = Color::rgb(240.0 / 255.0, 217.0 / 255.0, 181.0 / 255.0);
@@ -12,9 +12,11 @@ impl Plugin for BoardPlugin {
         app
             .init_resource::<SelectedSquare>()
             .init_resource::<SelectedPiece>()
+            .init_resource::<Turn>()
             .add_startup_system(create_board)
             .add_system(despawn_taken_pieces)
             .add_system(select_square)
+            .add_system(select_piece)
             .add_system(show_point);
     }
 }
@@ -54,10 +56,8 @@ struct SelectedPiece {
 fn select_square(
     mouse_button_inputs: Res<Input<MouseButton>>,
     mut selected_square: ResMut<SelectedSquare>,
-    mut selected_piece: ResMut<SelectedPiece>,
     mut squares_query: Query<(Entity, &Square)>,
     windows: Res<Windows>,
-    mut commands: Commands
 ) {
     // Only run if the left button is pressed
     if !mouse_button_inputs.just_pressed(MouseButton::Left) {
@@ -75,6 +75,41 @@ fn select_square(
                 selected_square.entity = Some(entity);
             }
         });
+    }
+}
+
+fn select_piece(
+    selected_square: Res<SelectedSquare>,
+    mut selected_piece: ResMut<SelectedPiece>,
+    turn: Res<Turn>,
+    square_query: Query<&Square>,
+    pieces: Query<(Entity, &Piece)>
+) {
+    // if square is not changed the square can't be valid
+    if !selected_square.is_changed() {
+        return;
+    }
+
+    let square_entity: Entity = if let Some(entity) = selected_square.entity {
+        entity 
+    } else {
+        return;
+    };
+
+    let square: &Square = if let Ok(square) = square_query.get(square_entity) {
+        square
+    } else {
+        return;
+    };
+
+    if selected_piece.entity.is_none() {
+        for (entity, piece) in pieces.iter() {
+            if piece.pos.0 as u8 == square.x && piece.pos.1 as u8 == square.y {
+                selected_piece.entity = Some(entity);
+                info!("Piece: {:?}", piece);
+                break;
+            }
+        }
     }
 }
 
