@@ -403,6 +403,14 @@ impl Piece {
 
         }
     }
+
+    pub fn promotion(&mut self, to: Kind) {
+        if self.kind == Kind::Pawn {
+            // Issue: Add => piece despawn and respawning new piece
+    
+            self.kind = to;
+        }
+    }
 }
 
 fn going_to_be_checked_if_moved(mut pieces: Vec<Piece>, king: Piece, from: (i32, i32), to: (i32, i32)) -> bool {

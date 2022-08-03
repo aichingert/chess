@@ -145,24 +145,22 @@ impl Piece {
             moves: Vec::new(),
         }
     }
-    
-    pub fn promotion(&mut self, to: Kind) {
-        if self.kind == Kind::Pawn {
-            // Issue: Add => piece despawn and respawning new piece
-    
-            self.kind = to;
-        }
-    }
 }
 
-fn move_pieces(time: Res<Time>, mut query: Query<(&mut Transform, &Piece)>) {
+fn move_pieces(_time: Res<Time>, mut query: Query<(&mut Transform, &Piece)>) {
     for (mut transform, piece) in query.iter_mut() {
-        // Get the direction to move in
-        let direction = Vec3::new(super::OFFSET + piece.pos.0 as f32 * super::SQUARE_SIZE, super::OFFSET + piece.pos.1 as f32 * super::SQUARE_SIZE, 1.0) - transform.translation;
-
-        // Only move if the piece isn't already there (distance is big)
-        if direction.length() > 0.1 {
-            transform.translation += direction.normalize() * (time.delta_seconds() * 5.);
+        if transform.translation.x != piece.pos.0 as f32 && transform.translation.y != piece.pos.1 as f32 {
+            transform.translation = Vec3::new(super::OFFSET + piece.pos.0 as f32 * super::SQUARE_SIZE, super::OFFSET + piece.pos.1 as f32 * super::SQUARE_SIZE, 1.0);
         }
+
+        /* if you want to see the pieces moving
+            // Get the direction to move in
+            let direction = Vec3::new(super::OFFSET + piece.pos.0 as f32 * super::SQUARE_SIZE, super::OFFSET + piece.pos.1 as f32 * super::SQUARE_SIZE, 1.0) - transform.translation;
+
+            // Only move if the piece isn't already there (distance is big)
+            if direction.length() > 0.1 {
+                transform.translation += direction.normalize() * (time.delta_seconds() * 100.);
+            }
+        */
     }
 }

@@ -13,11 +13,23 @@ impl Plugin for BoardPlugin {
             .init_resource::<SelectedSquare>()
             .init_resource::<SelectedPiece>()
             .init_resource::<Turn>()
+            .add_event::<ResetSelectedEvent>()
             .add_startup_system(create_board)
             .add_system(despawn_taken_pieces)
-            .add_system(select_square)
-            .add_system(select_piece)
-            .add_system(show_point);
+            .add_system(select_square.label("select_square"))
+            .add_system(
+                // move_piece needs to run before select_piece
+                move_piece
+                    .after("select_square")
+                    .before("select_piece"),
+            )
+            .add_system(
+                select_piece
+                    .after("select_square")
+                    .label("select_piece"),
+            )
+            .add_system(show_point)
+            .add_system(reset_selected.after("select_square"));
     }
 }
 
@@ -52,6 +64,8 @@ struct SelectedSquare {
 struct SelectedPiece {
     entity: Option<Entity>
 }
+
+struct ResetSelectedEvent;
 
 fn select_square(
     mouse_button_inputs: Res<Input<MouseButton>>,
@@ -104,12 +118,82 @@ fn select_piece(
 
     if selected_piece.entity.is_none() {
         for (entity, piece) in pieces.iter() {
-            if piece.pos.0 as u8 == square.x && piece.pos.1 as u8 == square.y {
+            if piece.pos.0 as u8 == square.x && piece.pos.1 as u8 == square.y && piece.color == turn.0 {
                 selected_piece.entity = Some(entity);
                 info!("Piece: {:?}", piece);
                 break;
             }
         }
+    }
+}
+
+fn move_piece(
+    mut commands: Commands,
+    selected_square: Res<SelectedSquare>,
+    selected_piece: Res<SelectedPiece>,
+    mut turn: ResMut<Turn>,
+    squares_query: Query<&Square>,
+    mut pieces_query: Query<(Entity, &mut Piece)>,
+    mut reset_selected_event: EventWriter<ResetSelectedEvent>,
+) {
+    if !selected_square.is_changed() {
+        return;
+    }
+
+    let square_entity = if let Some(entity) = selected_square.entity {
+        entity
+    } else {
+        return;
+    };
+
+    let square = if let Ok(square) = squares_query.get(square_entity) {
+        square
+    } else {
+        return;
+    };
+
+    if let Some(selected_piece_entity) = selected_piece.entity {
+        let pieces_vec: Vec<Piece> = pieces_query.iter_mut().map(|(_, piece)| piece.clone()).collect();
+        let pieces_entity_vec = pieces_query
+            .iter_mut()
+            .map(|(entity, piece)| (entity, piece.clone()))
+            .collect::<Vec<(Entity, Piece)>>();
+        // Move the selected piece to the selected square
+        let mut piece = if let Ok((_piece_entity, piece)) = pieces_query.get_mut(selected_piece_entity) {
+                piece
+            } else {
+                return;
+            };
+
+            for (other_entity, other_piece) in pieces_entity_vec {
+                if other_piece.pos.0 == square.x as i32
+                    && other_piece.pos.1 == square.y as i32
+                    && other_piece.color != piece.color
+                {
+                    // Mark the piece as taken
+                    commands.entity(other_entity).insert(Taken);
+                }
+            }
+
+            // Move piece
+            piece.pos.0 = square.x as i32;
+            piece.pos.1 = square.y as i32;
+
+            // Change turn
+            turn.change();
+
+        reset_selected_event.send(ResetSelectedEvent);
+    }
+}
+
+fn reset_selected(
+    mut event_reader: EventReader<ResetSelectedEvent>,
+    mut selected_square: ResMut<SelectedSquare>,
+    mut selected_piece: ResMut<SelectedPiece>,
+) {
+    for _event in event_reader.iter() {
+        selected_square.entity = None;
+        selected_piece.entity = None;
     }
 }
 
@@ -120,7 +204,7 @@ fn show_point(
 ) {
 
     query.for_each( | (square, point) | {
-        let direction = Vec3::new(super::OFFSET + square.x as f32 * super::SQUARE_SIZE, super::OFFSET + square.y as f32 * super::SQUARE_SIZE, 1.0);
+        let position = Vec3::new(super::OFFSET + square.x as f32 * super::SQUARE_SIZE, super::OFFSET + square.y as f32 * super::SQUARE_SIZE, 1.0);
 
         commands
             .spawn()
@@ -131,7 +215,7 @@ fn show_point(
                     ..default()
                 },
                 transform: Transform {
-                    translation: direction,
+                    translation: position,
                     scale: Vec3::new(20.0, 20.0, 2.0),
                     ..default()
                 },
@@ -199,8 +283,9 @@ fn despawn_taken_pieces(
     mut commands: Commands,
     query: Query<(Entity, &Piece, &Taken)>
 ) {
-    for (entity, piece, taken) in query.iter() {
+    // Gets all pieces that are marked as taken and removes them
+
+    for (entity, _, _) in query.iter() {
         commands.entity(entity).despawn_recursive();
     }
 }
-
