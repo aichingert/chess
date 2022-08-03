@@ -14,18 +14,19 @@ impl Plugin for BoardPlugin {
             .init_resource::<SelectedPiece>()
             .add_startup_system(create_board)
             .add_system(despawn_taken_pieces)
-            .add_system(select_square);
+            .add_system(select_square)
+            .add_system(show_point);
     }
 }
 
 #[derive(Component, Debug)]
-pub struct Square {
-    pub x: u8,
-    pub y: u8,
+struct Square {
+    x: u8,
+    y: u8,
 }
 
 impl Square {
-    pub fn new(x: u8, y: u8) -> Self {
+    fn new(x: u8, y: u8) -> Self {
         Self {
             x,
             y
@@ -40,7 +41,7 @@ pub struct Point;
 #[derive(Component)]
 struct Taken;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct SelectedSquare {
     entity: Option<Entity>
 }
@@ -71,16 +72,42 @@ fn select_square(
 
         squares_query.for_each_mut( | (entity, square) | {
             if square.x == x && square.y == y {
-                commands.entity(entity).insert(Point);
+                selected_square.entity = Some(entity);
             }
         });
     }
 }
 
+fn show_point(
+    mbi: Res<Input<MouseButton>>,
+    query: Query<(&Square, &Point)>,
+    mut commands: Commands
+) {
+
+    query.for_each( | (square, point) | {
+        let direction = Vec3::new(super::OFFSET + square.x as f32 * super::SQUARE_SIZE, super::OFFSET + square.y as f32 * super::SQUARE_SIZE, 1.0);
+
+        commands
+            .spawn()
+            .insert(Point)
+            .insert_bundle( SpriteBundle {
+                sprite: Sprite {
+                    color: Color::rgb(255.0, 0.0, 0.0),
+                    ..default()
+                },
+                transform: Transform {
+                    translation: direction,
+                    scale: Vec3::new(20.0, 20.0, 2.0),
+                    ..default()
+                },
+                ..default()
+        });
+    });
+}
+
 fn create_board(
     mut commands: Commands
 )   {
-
     // Cameras
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
