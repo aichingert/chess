@@ -1,5 +1,32 @@
 use bevy::prelude::*;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Kind {
+    Queen,
+    King,
+    Rook,
+    Bishop,
+    Knight,
+    Pawn,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PieceColor {
+    Black,
+    White,
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct Piece {
+    pub kind: Kind,
+    pub color: PieceColor,
+    pub pos: (u8, u8),
+    pub moves: Vec<(u8, u8)>,
+}
+
+// Turn struct has the current color that has the move
+pub struct Turn(pub PieceColor);
+
 pub struct PiecePlugin;
 
 impl Plugin for PiecePlugin {
@@ -61,7 +88,7 @@ fn spawn_pieces(
                 },
                 ..default()
             })
-            .insert(Piece::white(pieces[i], (i as i32, 0)));
+            .insert(Piece::white(pieces[i], (i as u8, 0)));
 
         commands
             .spawn_bundle(SpriteBundle {
@@ -73,45 +100,19 @@ fn spawn_pieces(
                 },
                 ..default()
             })
-            .insert(Piece::black(pieces[i], (i as i32, 7)));
+            .insert(Piece::black(pieces[i], (i as u8, 7)));
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Kind {
-    Queen,
-    King,
-    Rook,
-    Bishop,
-    Knight,
-    Pawn,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PieceColor {
-    Black,
-    White,
-}
-
-#[derive(Component, Debug, Clone)]
-pub struct Piece {
-    pub kind: Kind,
-    pub color: PieceColor,
-    pub pos: (i32, i32),
-    pub moves: Vec<(i32, i32)>,
-}
-
-// Turn struct has the current color that has the move
-pub struct Turn(pub PieceColor);
-
-// has the change function after move the turn changes to the enemy color
-// white => black
-// black => white
 impl Default for Turn {
     fn default() -> Self {
         Self(PieceColor::White)
     }
 }
+
+// has the change function after move the turn changes to the enemy color
+// white => black
+// black => white
 impl Turn {
     pub fn change(&mut self) {
         match self.0 {
@@ -128,7 +129,7 @@ impl Turn {
 // Implements the constructors for the a white piece and the black piece
 // also the function promotion => which promotes a pawn to any piece you want, except a pawn again and a king
 impl Piece {
-    fn white(kind: Kind, position: (i32, i32)) -> Piece {
+    fn white(kind: Kind, position: (u8, u8)) -> Piece {
         Piece {
             kind,
             color: PieceColor::White,
@@ -137,7 +138,7 @@ impl Piece {
         }
     }
     
-    fn black(kind: Kind, position: (i32, i32)) -> Piece {
+    fn black(kind: Kind, position: (u8, u8)) -> Piece {
         Piece {
             kind,
             color: PieceColor::Black,
@@ -154,6 +155,7 @@ fn move_pieces(_time: Res<Time>, mut query: Query<(&mut Transform, &Piece)>) {
         }
 
         /* if you want to see the pieces moving
+
             // Get the direction to move in
             let direction = Vec3::new(super::OFFSET + piece.pos.0 as f32 * super::SQUARE_SIZE, super::OFFSET + piece.pos.1 as f32 * super::SQUARE_SIZE, 1.0) - transform.translation;
 

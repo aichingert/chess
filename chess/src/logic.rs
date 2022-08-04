@@ -1,471 +1,115 @@
-use bevy::prelude::*;
 use crate::piece::*;
 
 impl Piece {
-    pub fn calculate_pseudo_legal_moves(&mut self, pieces: Vec<Piece>) {
-        self.moves.clear();
-        let mut possible_moves: Vec<(i32, i32)> = Vec::new(); 
-    
-        let x_position = self.pos.0;
-        let y_position = self.pos.1;
-    
-        match self.color {
-            PieceColor::White => {
-                match self.kind {
-                    Kind::Pawn => {
-                        if y_position == 7 {
-                            self.promotion(Kind::Queen);
-                            return;
-                        }
-                        let mut pawn_blocked = false;
+    pub fn is_move_valid(&mut self, pos: (u8, u8), pieces: &Vec<Piece>) -> bool {
+        true
+    }
 
-                        if y_position == 1 {
-                            for p in &pieces {
-                                for i in 1..3 {
-                                    if (y_position + i) == p.pos.1 && x_position == p.pos.0 {
-                                        pawn_blocked = true;
-                                        break;
-                                    }
-                                }
-                            }
+    pub fn get_moves(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+        let mut possible_moves: Vec<(u8, u8)> = Vec::new();
 
-                            if !pawn_blocked {
-                                possible_moves.push((x_position, y_position + 2));
-                            }
-                        }
-                    
-                        pawn_blocked = false;
+        self.check_horizontal(pieces).iter().for_each( | pos |{
+            possible_moves.push(*pos)
+        });
 
-                        for p in &pieces {
-                            if (y_position + 1) == p.pos.1 && x_position == p.pos.0 || (y_position + 1) > 7 {
-                                pawn_blocked = true;
-                            }
-                            
-                            match p.color {
-                                PieceColor::Black => {
-                                    if (y_position + 1) == p.pos.1 && (x_position + 1) == p.pos.0 
-                                    && ( (y_position + 1) < 8 || (x_position + 1) < 8 ) {
-                                        possible_moves.push((x_position + 1, y_position + 1))
-                                    }
-        
-                                    if (y_position + 1) == p.pos.1 && (x_position - 1) == p.pos.0 
-                                        && ( (y_position + 1) < 8 || (x_position - 1) > -1 ) {
-                                        possible_moves.push((x_position - 1, y_position + 1))
-                                    }
-                                },
-                                _ => {}
-                            }
-                        }
+        self.check_vertical(pieces).iter().for_each( | pos | {
+            possible_moves.push(*pos);
+        });
 
-                        if !pawn_blocked {
-                            possible_moves.push((x_position, y_position + 1));
-                        }
+        possible_moves
+    }
 
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Knight => {
-                        possible_moves.push((x_position + 2, y_position + 1));
-                        possible_moves.push((x_position + 2, y_position - 1));
-                        possible_moves.push((x_position - 2, y_position + 1));
-                        possible_moves.push((x_position - 2, y_position - 1));
-                        possible_moves.push((x_position + 1, y_position + 2));
-                        possible_moves.push((x_position - 1, y_position + 2));
-                        possible_moves.push((x_position + 1, y_position - 2));
-                        possible_moves.push((x_position - 1, y_position - 2));
+    fn check_vertical(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+        let mut possible_positions: Vec<(u8, u8)> = Vec::new();
 
-                        let mut idx: usize;
-                        let mut bad_moves: bool = true;
+        'finished_up: for i in self.pos.1+1..8 {
+            let mut encounter: (bool, PieceColor) = (false, PieceColor::Black);
 
-                        while bad_moves {
-                            bad_moves = false;
-                            idx = 0;
-
-                            for i in 0..possible_moves.len() {
-                                if possible_moves[i].0 < 0 || possible_moves[i].0 > 7 
-                                || possible_moves[i].1 < 0 || possible_moves[i].1 > 7
-                                || blocked_by_friendly(pieces.clone(), possible_moves[i], PieceColor::White) {
-                                    bad_moves = true;
-                                    idx = i;
-                                    break;
-                                }
-                            }
-
-                            if bad_moves {
-                                possible_moves.remove(idx);
-                            }
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Bishop => {
-                        let mut x_pos: i32 = x_position;
-
-                        for i in y_position+1..8 {
-                            x_pos += 1;
-
-                            if !blocked_by_friendly(pieces.clone(), (x_pos, i) ,PieceColor::White) 
-                            && x_pos < 8 {
-                                possible_moves.push((x_pos, i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        x_pos = x_position;
-
-                        for i in y_position+1..8 {
-                            x_pos -= 1;
-
-                            if !blocked_by_friendly(pieces.clone(), (x_pos, i) ,PieceColor::White) 
-                            && x_pos > -1 {
-                                possible_moves.push((x_pos, i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        x_pos = x_position;
-
-                        for i in 1..y_position {
-                            x_pos += 1;
-
-                            if !blocked_by_friendly(pieces.clone(), (x_pos, y_position + i) ,PieceColor::White) 
-                            && x_pos < 8 {
-                                possible_moves.push((x_pos, i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        x_pos = x_position;
-
-                        for i in 1..y_position {
-                            x_pos -= 1;
-
-                            if !blocked_by_friendly(pieces.clone(), (x_pos, y_position - i) ,PieceColor::White) 
-                            && x_pos > -1 {
-                                possible_moves.push((x_pos, i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Rook => {
-                        for i in 0..x_position {
-                            if blocked_by_friendly(pieces.clone(), (x_position - (i + 1), y_position), PieceColor::White)
-                            && (x_position - (i + 1)) > -1 {
-                                possible_moves.push((x_position - (i + 1), y_position));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        for i in x_position+1..8 {
-                            if blocked_by_friendly(pieces.clone(), ((x_position + i), y_position), PieceColor::White) 
-                            && x_position + i < 8 {
-                                possible_moves.push((x_position + i, y_position));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        for i in 0..y_position {
-                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position - (i + 1))), PieceColor::White) 
-                            && (y_position - (i + 1)) > -1 {
-                                possible_moves.push((x_position, y_position - (i + 1)));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        for i in y_position+1..8 {
-                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position + i)), PieceColor::White)
-                                && x_position + i < 8 {
-                                    possible_moves.push((x_position, y_position + i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Queen => {},
-                    Kind::King => {},
+            for piece in pieces {
+                if i == piece.pos.1 && self.pos.0 == piece.pos.0 {
+                    encounter = (true, piece.color);
+                    break;
                 }
-            },
-            PieceColor::Black => {
-                match self.kind {
-                    Kind::Pawn => {
-                        if y_position == 0 {
-                            self.promotion(Kind::Queen);
-                            return;
-                        }
+            }
 
-                        let mut pawn_blocked = false;
-
-                        if y_position == 6 {
-                            for p in &pieces {
-                                for i in 1..3 {
-                                    if (y_position - i) == p.pos.1 && x_position == p.pos.0 {
-                                        pawn_blocked = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if !pawn_blocked {
-                                possible_moves.push((x_position, y_position - 2));
-                            }
-                        }
-
-                        pawn_blocked = false;
-
-                        for p in &pieces {
-                            if (y_position - 1) == p.pos.1 && x_position == p.pos.0 || (y_position - 1) < 0 {
-                                pawn_blocked = true;
-                            }
-
-                            match p.color {
-                                PieceColor::White => {
-                                    if (y_position - 1) == p.pos.1 && (x_position + 1) == p.pos.0 
-                                    && ( (y_position - 1) < -1 || (x_position + 1) < 8 ) {
-                                        possible_moves.push((x_position + 1, y_position - 1))
-                                    }
-        
-                                    if (y_position - 1) == p.pos.1 && (x_position - 1) == p.pos.0 
-                                        && ( (y_position - 1) > -1 || (x_position - 1) > -1 ) {
-                                        possible_moves.push((x_position - 1, y_position - 1))
-                                    }
-                                },
-                                _ => {}
-                            }
-                        }
-
-                        if !pawn_blocked {
-                            possible_moves.push((x_position, y_position - 1));
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Knight => {
-                        possible_moves.push((x_position + 2, y_position + 1));
-                        possible_moves.push((x_position + 2, y_position - 1));
-                        possible_moves.push((x_position - 2, y_position + 1));
-                        possible_moves.push((x_position - 2, y_position - 1));
-                        possible_moves.push((x_position + 1, y_position + 2));
-                        possible_moves.push((x_position - 1, y_position + 2));
-                        possible_moves.push((x_position + 1, y_position - 2));
-                        possible_moves.push((x_position - 1, y_position - 2));
-
-                        let mut idx: usize;
-                        let mut bad_moves: bool = true;
-
-                        while bad_moves {
-                            bad_moves = false;
-                            idx = 0;
-
-                            for i in 0..possible_moves.len() {
-                                if possible_moves[i].0 < 0 || possible_moves[i].0 > 7 
-                                || possible_moves[i].1 < 0 || possible_moves[i].1 > 7
-                                || blocked_by_friendly(pieces.clone(), possible_moves[i], PieceColor::Black) {
-                                    bad_moves = true;
-                                    idx = i;
-                                    break;
-                                }
-                            }
-
-                            if bad_moves {
-                                possible_moves.remove(idx);
-                            }
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Bishop => {
-                        let mut x_pos: i32 = x_position;
-
-                        for i in y_position+1..8 {
-                            x_pos += 1;
-
-                            if !blocked_by_friendly(pieces.clone(), (x_pos, i) ,PieceColor::Black) 
-                            && x_pos < 8 {
-                                possible_moves.push((x_pos, i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        x_pos = x_position;
-
-                        for i in y_position+1..8 {
-                            x_pos -= 1;
-
-                            if !blocked_by_friendly(pieces.clone(), (x_pos, i) ,PieceColor::Black) 
-                            && x_pos > -1 {
-                                possible_moves.push((x_pos, i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        x_pos = x_position;
-
-                        for i in 1..y_position {
-                            x_pos += 1;
-
-                            if !blocked_by_friendly(pieces.clone(), (x_pos, y_position + i) ,PieceColor::Black) 
-                            && x_pos < 8 {
-                                possible_moves.push((x_pos, i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        x_pos = x_position;
-
-                        for i in 1..y_position {
-                            x_pos -= 1;
-
-                            if !blocked_by_friendly(pieces.clone(), (x_pos, y_position - i) ,PieceColor::Black) 
-                            && x_pos > -1 {
-                                possible_moves.push((x_pos, i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Rook => {
-                        for i in 0..x_position {
-                            if blocked_by_friendly(pieces.clone(), (x_position - (i + 1), y_position), PieceColor::Black)
-                            && (x_position - (i + 1)) > -1 {
-                                possible_moves.push((x_position - (i + 1), y_position));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        for i in x_position+1..8 {
-                            if blocked_by_friendly(pieces.clone(), ((x_position + i), y_position), PieceColor::Black) 
-                            && x_position + i < 8 {
-                                possible_moves.push((x_position + i, y_position));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        for i in 0..y_position {
-                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position - (i + 1))), PieceColor::Black) 
-                            && (y_position - (i + 1)) > -1 {
-                                possible_moves.push((x_position, y_position - (i + 1)));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        for i in y_position+1..8 {
-                            if blocked_by_friendly(pieces.clone(), (x_position, (y_position + i)), PieceColor::Black)
-                                && x_position + i < 8 {
-                                    possible_moves.push((x_position, y_position + i));
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        self.moves = possible_moves.clone();
-                    },
-                    Kind::Queen => {},
-                    Kind::King => {},
+            if encounter.0 {
+                if self.color != encounter.1 {
+                    possible_positions.push((self.pos.0, i));
                 }
-            },
-        }
-    
-        if in_check(pieces.clone(), self.color) {
 
-        }
-    }
-
-    pub fn promotion(&mut self, to: Kind) {
-        if self.kind == Kind::Pawn {
-            // Issue: Add => piece despawn and respawning new piece
-    
-            self.kind = to;
-        }
-    }
-}
-
-fn going_to_be_checked_if_moved(mut pieces: Vec<Piece>, king: Piece, from: (i32, i32), to: (i32, i32)) -> bool {
-    let piece_positions = pieces.clone();
-
-    for mut piece in pieces {
-        piece.calculate_pseudo_legal_moves(piece_positions.clone());
-    }
-
-
-
-    false
-}
-
-fn in_check(pieces: Vec<Piece>, has_color: PieceColor) -> bool {
-    let mut king_position = (-1, -1);
-
-    for p in pieces.clone() {
-        match p.color {
-            has_color => {
-                match p.kind {
-                    Kind::King => {
-                        king_position = p.pos.clone();
-                    },
-                    _ => {}
-                }
-            },
-            _ => {}
-        }
-    }
-
-    for p in pieces.clone() {
-        for possible_move in p.moves {
-            if possible_move == king_position {
-                return true;
+                break 'finished_up;
+            } else {
+                possible_positions.push((self.pos.0, i));
             }
         }
-    }
 
-    false
-}
+        'finished_down: for i in 1..self.pos.1 {
+            let mut encounter: (bool, PieceColor) = (false, PieceColor::Black);
 
-fn blocked_by_friendly(
-    pieces: Vec<Piece>,
-    pseudo_move: (i32, i32),
-    friendly_color: PieceColor,
-) -> bool {
-    for piece in &pieces {
-        if piece.color == friendly_color {
-            if piece.pos == pseudo_move {
-                info!("Cock blocked by {:?}, {:?}", piece, pseudo_move);
-                return true;
+            for piece in pieces {
+                if (self.pos.1 - i) == piece.pos.1 && self.pos.0 == piece.pos.0 {
+                    encounter = (true, piece.color);
+                    break;
+                }
+            }
+
+            if encounter.0 {
+                if self.color != encounter.1 {
+                    possible_positions.push((self.pos.0, (self.pos.1 - i)));
+                }
+
+                break 'finished_down;
+            } else {
+                possible_positions.push((self.pos.0, (self.pos.1 - i)));
             }
         }
+
+        possible_positions
     }
 
-    false
+    fn check_horizontal(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+        let mut possible_positions: Vec<(u8, u8)> = Vec::new();
+
+        'finished_right: for i in self.pos.0+1..8 {
+            let mut encounter: (bool, PieceColor) = (false, PieceColor::Black);
+
+            for piece in pieces {
+                if piece.pos.0 == i && piece.pos.1 == self.pos.1 {
+                    encounter = (true, piece.color);
+                }
+            }
+
+            if encounter.0 {
+                if encounter.1 != self.color {
+                    possible_positions.push((i, self.pos.1));
+                }
+
+                break 'finished_right;
+            } else {
+                possible_positions.push((i, self.pos.1));
+            }
+        }
+
+        'finished_left: for i in 1..=self.pos.0 {
+            let mut encounter: (bool, PieceColor) = (false, PieceColor::Black);
+
+            for piece in pieces {
+                if piece.pos.0 == (self.pos.0 - i) && piece.pos.1 == self.pos.1 {
+                    encounter = (true, piece.color);
+                }
+            }
+
+            if encounter.0 {
+                if encounter.1 != self.color {
+                    possible_positions.push(((self.pos.0 - i), self.pos.1));
+                }
+
+                break 'finished_left;
+            } else {
+                possible_positions.push(((self.pos.0 - i), self.pos.1));
+            }
+        }
+
+        possible_positions
+    }
 }
