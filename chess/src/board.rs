@@ -107,7 +107,7 @@ fn select_piece(
     mut selected_piece: ResMut<SelectedPiece>,
     turn: Res<Turn>,
     square_query: Query<(Entity, &Square)>,
-    pieces: Query<(Entity, &Piece)>,
+    piece_entitys: Query<(Entity, &Piece)>,
     mut commands: Commands
 ) {
     // if square is not changed the square can't be valid
@@ -129,12 +129,12 @@ fn select_piece(
 
     let mut pieces_on_the_board: Vec<&Piece> = Vec::new();
 
-    for (_, piece) in pieces.iter() {
+    for (_, piece) in piece_entitys.iter() {
         pieces_on_the_board.push(piece);
     }
 
     if selected_piece.entity.is_none() {
-        for (entity, piece) in pieces.iter() {
+        for (entity, piece) in piece_entitys.iter() {
             if piece.pos.0 as u8 == square.x && piece.pos.1 as u8 == square.y && piece.color == turn.0 {
                 selected_piece.entity = Some(entity);
 

@@ -2,6 +2,8 @@ use crate::piece::*;
 
 impl Piece {
     pub fn is_move_valid(&mut self, pos: (u8, u8), pieces: &Vec<Piece>) -> bool {
+        
+
         true
     }
 
