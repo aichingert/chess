@@ -175,6 +175,9 @@ fn move_piece(
         return;
     }
 
+    // Removing the highlighted spots from the board
+    reset_highlighted_event.send(ResetHighlightedSquares);
+
     let square_entity = if let Some(entity) = selected_square.entity {
         entity
     } else {
@@ -193,6 +196,7 @@ fn move_piece(
             .iter_mut()
             .map(|(entity, piece)| (entity, piece.clone()))
             .collect::<Vec<(Entity, Piece)>>();
+
         // Move the selected piece to the selected square
         let mut piece = if let Ok((_piece_entity, piece)) = pieces_query.get_mut(selected_piece_entity) {
             piece
@@ -222,7 +226,6 @@ fn move_piece(
         turn.change();
 
         reset_selected_event.send(ResetSelectedEvent);
-        reset_highlighted_event.send(ResetHighlightedSquares);
     }
 }
 
@@ -282,7 +285,7 @@ fn highlight_squares(
                 },
                 transform: Transform {
                     translation: position,
-                    scale: Vec3::new(20.0, 20.0, 2.0),
+                    scale: Vec3::new(super::SQUARE_SIZE, super::SQUARE_SIZE, 2.0),
                     ..default()
                 },
                 ..default()
