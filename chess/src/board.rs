@@ -278,7 +278,7 @@ fn highlight_squares(
             .insert(Point)
             .insert_bundle( SpriteBundle {
                 sprite: Sprite {
-                    color: Color::rgb(255.0, 0.0, 0.0),
+                    color: Color::rgb(1.0, 0.0, 0.0),
                     ..default()
                 },
                 transform: Transform {

@@ -16,7 +16,7 @@ impl Piece {
                 self.check_diagonal_left(pieces).iter().for_each( | pos | possible_moves.push(*pos));
             },
             Kind::King => {
-
+                self.check_king_moves(pieces).iter().for_each( | pos | possible_moves.push(*pos));
             },
             Kind::Rook => {
                 self.check_horizontal(pieces).iter().for_each( | pos | possible_moves.push(*pos));
@@ -31,6 +31,45 @@ impl Piece {
             },
             Kind::Pawn => {
                 self.check_pawn_moves(pieces).iter().for_each( | pos | possible_moves.push(*pos));
+            }
+        }
+
+        possible_moves
+    }
+
+    fn check_king_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
+        let mut possible_moves: Vec<(u8, u8)> = Vec::new();
+
+        for i in -1..2 {
+            for j in -1..2 {
+                if self.pos.0 as i8 + i > -1 
+                && self.pos.1 as i8 + j > -1
+                && self.pos.0 + (i as u8) < 8
+                && self.pos.1 + (j as u8) < 8 
+                {
+                    let mut encounter: (bool, PieceColor) = (false, PieceColor::White);
+
+                    for piece in pieces {
+                        if self.pos.0 as i8 + i == piece.pos.0 as i8 && self.pos.1 as i8 + j == piece.pos.1 as i8 {
+                            encounter = (true, piece.color);
+                        }
+                    }
+
+                    if !encounter.0 {
+                        possible_moves.push(((self.pos.0 as i8 + i) as u8, (self.pos.1 as i8 + j) as u8))
+                    } else {
+                        if encounter.1 != self.color {
+                            possible_moves.push(((self.pos.0 as i8 + i) as u8, (self.pos.1 as i8 + j) as u8))
+                        }
+                    }
+                }
+            }
+        }
+
+        for i in 0..possible_moves.len() {
+            if possible_moves[i] == self.pos {
+                possible_moves.remove(i);
+                break;
             }
         }
 
