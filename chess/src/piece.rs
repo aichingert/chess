@@ -21,7 +21,6 @@ pub struct Piece {
     pub kind: Kind,
     pub color: PieceColor,
     pub pos: (u8, u8),
-    pub moves: Vec<(u8, u8)>,
 }
 
 // Turn struct has the current color that has the move
@@ -134,7 +133,6 @@ impl Piece {
             kind,
             color: PieceColor::White,
             pos: position,
-            moves: Vec::new(),
         }
     }
     
@@ -143,7 +141,6 @@ impl Piece {
             kind,
             color: PieceColor::Black,
             pos: position,
-            moves: Vec::new(),
         }
     }
 }

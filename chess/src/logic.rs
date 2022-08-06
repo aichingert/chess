@@ -2,12 +2,10 @@ use crate::piece::*;
 
 impl Piece {
     pub fn is_move_valid(&mut self, pos: (u8, u8), pieces: &Vec<Piece>) -> bool {
-        
-
-        true
+        self.get_moves(pieces).contains(&pos)
     }
 
-    pub fn get_moves(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+    pub fn get_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
         let mut possible_moves: Vec<(u8, u8)> = Vec::new();
 
         match self.kind {
@@ -32,14 +30,101 @@ impl Piece {
                 self.check_horse_moves(pieces).iter().for_each( | pos | possible_moves.push(*pos));
             },
             Kind::Pawn => {
-
+                self.check_pawn_moves(pieces).iter().for_each( | pos | possible_moves.push(*pos));
             }
         }
 
         possible_moves
     }
 
-    fn check_horse_moves(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+    fn check_pawn_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
+        let mut possible_position: Vec<(u8, u8)> = Vec::new();
+
+        match self.color {
+            PieceColor::White => {
+                let mut encounter: bool = false;
+
+                if self.pos.1 == 1 {
+                    for i in 1..=2 {
+                        for piece in pieces {
+                            if self.pos.0 == piece.pos.0 && self.pos.1 + i == piece.pos.1 {
+                                encounter = true;
+                            }
+                        }
+                    }
+
+                    if !encounter {
+                        possible_position.push((self.pos.0, self.pos.1 + 2));
+                    }
+                }
+
+                if self.pos.1 + 1 < 8 {
+                    encounter = false;
+
+                    for piece in pieces {
+                        if self.pos.0 as i8 > -1 && piece.pos.0 == self.pos.0 - 1 && piece.pos.1 == self.pos.1 + 1 && self.color != piece.color {
+                            possible_position.push((self.pos.0 - 1, self.pos.1 + 1))
+                        }
+
+                        if self.pos.0 + 1 < 8 && piece.pos.0 == self.pos.0 + 1 && piece.pos.1 == self.pos.1 + 1 && self.color != piece.color {
+                            possible_position.push((self.pos.0 + 1, self.pos.1 + 1))
+                        }
+
+                        if self.pos.0 == piece.pos.0 && self.pos.1 + 1 == piece.pos.1 {
+                            encounter = true;
+                        }
+                    }
+
+                    if !encounter {
+                        possible_position.push((self.pos.0, self.pos.1 + 1));
+                    }
+                }
+            },
+            PieceColor::Black => {
+                let mut encounter: bool = false;
+
+                if self.pos.1 == 6 {
+                    for i in 1..=2 {
+                        for piece in pieces {
+                            if self.pos.0 == piece.pos.0 && self.pos.1 - i == piece.pos.1 {
+                                encounter = true;
+                            }
+                        }
+                    }
+
+                    if !encounter {
+                        possible_position.push((self.pos.0, self.pos.1 - 2));
+                    }
+                }
+
+                if self.pos.1 as i8 - 1 > -1 {
+                    encounter = false;
+
+                    for piece in pieces {
+                        if self.pos.0 as i8 > -1 && piece.pos.0 == self.pos.0 - 1 && piece.pos.1 == self.pos.1 - 1 && self.color != piece.color {
+                            possible_position.push((self.pos.0 - 1, self.pos.1 - 1))
+                        }
+
+                        if self.pos.0 + 1 < 8 && piece.pos.0 == self.pos.0 + 1 && piece.pos.1 == self.pos.1 - 1 && self.color != piece.color {
+                            possible_position.push((self.pos.0 + 1, self.pos.1 - 1))
+                        }
+
+                        if self.pos.0 == piece.pos.0 && self.pos.1 - 1 == piece.pos.1 {
+                            encounter = true;
+                        }
+                    }
+
+                    if !encounter {
+                        possible_position.push((self.pos.0, self.pos.1 - 1));
+                    }
+                }
+            }
+        }
+
+        possible_position
+    }
+
+    fn check_horse_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
         let mut possible_positions: Vec<(u8, u8)> = Vec::new();
 
         let moves_to_check: Vec<(i8, i8)> = vec![
@@ -78,7 +163,7 @@ impl Piece {
         possible_positions
     }
 
-    fn check_diagonal_left(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+    fn check_diagonal_left(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
         let mut possible_positions: Vec<(u8, u8)> = Vec::new();
 
         let mut j: u8 = 0;
@@ -131,7 +216,7 @@ impl Piece {
         possible_positions
     }
 
-    fn check_diagonal_right(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+    fn check_diagonal_right(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
         let mut possible_positions: Vec<(u8, u8)> = Vec::new();
         let mut j: u8 = 0;
 
@@ -182,7 +267,7 @@ impl Piece {
         possible_positions
     }
 
-    fn check_vertical(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+    fn check_vertical(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
         let mut possible_positions: Vec<(u8, u8)> = Vec::new();
 
         'finished_up: for i in self.pos.1+1..8 {
@@ -230,7 +315,7 @@ impl Piece {
         possible_positions
     }
 
-    fn check_horizontal(&self, pieces: &Vec<&Piece>) -> Vec<(u8, u8)> {
+    fn check_horizontal(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
         let mut possible_positions: Vec<(u8, u8)> = Vec::new();
 
         'finished_right: for i in self.pos.0+1..8 {

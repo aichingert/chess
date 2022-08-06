@@ -127,10 +127,10 @@ fn select_piece(
         return;
     };
 
-    let mut pieces_on_the_board: Vec<&Piece> = Vec::new();
+    let mut pieces_on_the_board: Vec<Piece> = Vec::new();
 
     for (_, piece) in piece_entitys.iter() {
-        pieces_on_the_board.push(piece);
+        pieces_on_the_board.push(piece.clone());
     }
 
     if selected_piece.entity.is_none() {
@@ -191,7 +191,7 @@ fn move_piece(
     };
 
     if let Some(selected_piece_entity) = selected_piece.entity {
-        let pieces_vec: Vec<Piece> = pieces_query.iter_mut().map(|(_, piece)| piece.clone()).collect();
+        let pieces_vec: Vec<Piece> = pieces_query.iter().map(|(_, piece)| piece.clone()).collect();
         let pieces_entity_vec: Vec<(Entity, Piece)> = pieces_query
             .iter_mut()
             .map(|(entity, piece)| (entity, piece.clone()))
@@ -205,25 +205,23 @@ fn move_piece(
         };
 
         if piece.is_move_valid((square.x, square.y), &pieces_vec) {
-
-        }
-
-        for (other_entity, other_piece) in pieces_entity_vec {
-            if other_piece.pos.0 == square.x    
-                && other_piece.pos.1 == square.y
-                && other_piece.color != piece.color
-            {
-                // Mark the piece as taken
-                commands.entity(other_entity).insert(Taken);
+            for (other_entity, other_piece) in pieces_entity_vec {
+                if other_piece.pos.0 == square.x    
+                    && other_piece.pos.1 == square.y
+                    && other_piece.color != piece.color
+                {
+                    // Mark the piece as taken
+                    commands.entity(other_entity).insert(Taken);
+                }
             }
+    
+            // Move piece
+            piece.pos.0 = square.x;
+            piece.pos.1 = square.y;
+    
+            // Change turn
+            turn.change();
         }
-
-        // Move piece
-        piece.pos.0 = square.x;
-        piece.pos.1 = square.y;
-
-        // Change turn
-        turn.change();
 
         reset_selected_event.send(ResetSelectedEvent);
     }
