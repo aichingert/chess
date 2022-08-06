@@ -1,11 +1,32 @@
 use crate::piece::*;
+use crate::board::Move;
 
 impl Piece {
-    pub fn is_move_valid(&mut self, pos: (u8, u8), pieces: &Vec<Piece>) -> bool {
-        self.get_moves(pieces).contains(&pos)
+    pub fn is_move_valid(&mut self, pos: (u8, u8), pieces: &Vec<Piece>, game_history: &Vec<Move>) -> (bool, i8) {
+        let moves: Vec<(u8, u8)> = self.get_moves(pieces, game_history);
+        let mut en_passant: i8 = 0;
+
+        if game_history.len() > 0 {
+            let last_move: &Move = &game_history[game_history.len() - 1];
+
+            match self.color {
+                PieceColor::White => {
+                    if last_move.piece.kind == Kind::Pawn && self.kind == Kind::Pawn && pos.1 - 1 == last_move.to.1 && pos.0 == last_move.to.0 {
+                        en_passant = -1;
+                    } 
+                },
+                PieceColor::Black => {
+                    if last_move.piece.kind == Kind::Pawn && self.kind == Kind::Pawn && pos.1 + 1 == last_move.to.1 && pos.0 == last_move.to.0 {
+                        en_passant = 1;
+                    } 
+                }
+            }
+        }
+
+        (moves.contains(&pos), en_passant)
     }
 
-    pub fn get_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
+    pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<(u8, u8)> {
         let mut possible_moves: Vec<(u8, u8)> = Vec::new();
 
         match self.kind {
@@ -30,7 +51,7 @@ impl Piece {
                 self.check_horse_moves(pieces).iter().for_each( | pos | possible_moves.push(*pos));
             },
             Kind::Pawn => {
-                self.check_pawn_moves(pieces).iter().for_each( | pos | possible_moves.push(*pos));
+                self.check_pawn_moves(pieces, moves).iter().for_each( | pos | possible_moves.push(*pos));
             }
         }
 
@@ -76,7 +97,7 @@ impl Piece {
         possible_moves
     }
 
-    fn check_pawn_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
+    fn check_pawn_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<(u8, u8)> {
         let mut possible_position: Vec<(u8, u8)> = Vec::new();
 
         match self.color {
@@ -94,6 +115,20 @@ impl Piece {
 
                     if !encounter {
                         possible_position.push((self.pos.0, self.pos.1 + 2));
+                    }
+                }
+
+                if moves.len() > 0 {
+                    let last_move: &Move = &moves[moves.len() - 1];
+
+                    if self.pos.1 == 4 && last_move.piece.kind == Kind::Pawn && last_move.to.1 == 4 && last_move.from.1 == 6 && self.color != last_move.piece.color {
+                        if self.pos.0 as i8 - 1 > -1 && self.pos.0 - 1 == last_move.to.0 {
+                            possible_position.push((self.pos.0 - 1, self.pos.1 + 1));
+                        }
+    
+                        if self.pos.0 + 1 == last_move.to.0 {
+                            possible_position.push((self.pos.0 + 1, self.pos.1 + 1));
+                        }
                     }
                 }
 
@@ -133,6 +168,20 @@ impl Piece {
 
                     if !encounter {
                         possible_position.push((self.pos.0, self.pos.1 - 2));
+                    }
+                }
+
+                if moves.len() > 0 {
+                    let last_move: &Move = &moves[moves.len() - 1];
+
+                    if self.pos.1 == 3 && last_move.piece.kind == Kind::Pawn && last_move.to.1 == 3 && last_move.from.1 == 1 && self.color != last_move.piece.color {
+                        if self.pos.0 as i8 - 1 > -1 && self.pos.0 - 1 == last_move.to.0 {
+                            possible_position.push((self.pos.0 - 1, self.pos.1 - 1));
+                        }
+    
+                        if self.pos.0 + 1 == last_move.to.0 {
+                            possible_position.push((self.pos.0 + 1, self.pos.1 - 1));
+                        }
                     }
                 }
 

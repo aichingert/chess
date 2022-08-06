@@ -13,6 +13,7 @@ impl Plugin for BoardPlugin {
             .init_resource::<SelectedSquare>()
             .init_resource::<SelectedPiece>()
             .init_resource::<Turn>()
+            .init_resource::<GameHistory>()
             .add_event::<ResetSelectedEvent>()
             .add_event::<ResetHighlightedSquares>()
             .add_startup_system(create_board)
@@ -62,6 +63,18 @@ struct SelectedPiece {
     entity: Option<Entity>
 }
 
+#[derive(Debug, Clone)]
+pub struct Move {
+    pub piece: Piece,
+    pub from: (u8, u8),
+    pub to: (u8, u8),
+}
+
+#[derive(Default, Clone)]
+pub struct GameHistory {
+    pub moves: Vec<Move>
+}
+
 struct ResetSelectedEvent;
 struct ResetHighlightedSquares;
 
@@ -70,6 +83,16 @@ impl Square {
         Self {
             x,
             y
+        }
+    }
+}
+
+impl Move {
+    fn new(piece: Piece, from: (u8, u8), to: (u8, u8)) -> Self {
+        Self { 
+            piece, 
+            from, 
+            to
         }
     }
 }
@@ -108,7 +131,8 @@ fn select_piece(
     turn: Res<Turn>,
     square_query: Query<(Entity, &Square)>,
     piece_entitys: Query<(Entity, &Piece)>,
-    mut commands: Commands
+    mut commands: Commands,
+    game_history: Res<GameHistory>
 ) {
     // if square is not changed the square can't be valid
     if !selected_square.is_changed() {
@@ -145,7 +169,7 @@ fn select_piece(
                     }
                 }
 
-                let positions: Vec<(u8, u8)> = piece.get_moves(&pieces_on_the_board);
+                let positions: Vec<(u8, u8)> = piece.get_moves(&pieces_on_the_board, &game_history.moves);
 
                 for i in 0..positions.len() {
                     for (entity, square) in square_query.iter() {
@@ -169,7 +193,8 @@ fn move_piece(
     squares_query: Query<&Square>,
     mut pieces_query: Query<(Entity, &mut Piece)>,
     mut reset_selected_event: EventWriter<ResetSelectedEvent>,
-    mut reset_highlighted_event: EventWriter<ResetHighlightedSquares>
+    mut reset_highlighted_event: EventWriter<ResetHighlightedSquares>,
+    mut game_history: ResMut<GameHistory>
 ) {
     if !selected_square.is_changed() {
         return;
@@ -189,7 +214,7 @@ fn move_piece(
     } else {
         return;
     };
-
+    
     if let Some(selected_piece_entity) = selected_piece.entity {
         let pieces_vec: Vec<Piece> = pieces_query.iter().map(|(_, piece)| piece.clone()).collect();
         let pieces_entity_vec: Vec<(Entity, Piece)> = pieces_query
@@ -204,17 +229,23 @@ fn move_piece(
             return;
         };
 
-        if piece.is_move_valid((square.x, square.y), &pieces_vec) {
+        let is_move_valid_and_en_passant: (bool, i8) = piece.is_move_valid((square.x, square.y), &pieces_vec, &game_history.moves);
+
+        if is_move_valid_and_en_passant.0 {
+            let pos_y: i8 = is_move_valid_and_en_passant.1;
+
             for (other_entity, other_piece) in pieces_entity_vec {
                 if other_piece.pos.0 == square.x    
-                    && other_piece.pos.1 == square.y
+                    && other_piece.pos.1 as i8 == square.y as i8 + pos_y
                     && other_piece.color != piece.color
                 {
                     // Mark the piece as taken
                     commands.entity(other_entity).insert(Taken);
                 }
             }
-    
+
+            game_history.moves.push(Move::new(piece.clone(), piece.pos, (square.x, square.y)));
+
             // Move piece
             piece.pos.0 = square.x;
             piece.pos.1 = square.y;
