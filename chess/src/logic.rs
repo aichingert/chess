@@ -3,7 +3,7 @@ use crate::board::Move;
 
 impl Piece {
     pub fn is_move_valid(&mut self, pos: (u8, u8), pieces: &Vec<Piece>, game_history: &Vec<Move>) -> (bool, i8) {
-        let moves: Vec<(u8, u8)> = self.get_moves(pieces, game_history);
+        let moves: Vec<(u8, u8)> = self.get_moves(pieces, game_history, true);
         let mut en_passant: i8 = 0;
 
         if game_history.len() > 0 {
@@ -26,9 +26,12 @@ impl Piece {
         (moves.contains(&pos), en_passant)
     }
 
-    pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<(u8, u8)> {
+    pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>, check_safety: bool) -> Vec<(u8, u8)> {
         let mut possible_moves: Vec<(u8, u8)> = Vec::new();
 
+        if check_safety && !self.check_king_safety(pieces, moves) {
+            return vec![];
+        }
         match self.kind {
             Kind::Queen => {
                 self.check_horizontal(pieces).iter().for_each( | pos | possible_moves.push(*pos));
@@ -56,6 +59,34 @@ impl Piece {
         }
 
         possible_moves
+    }
+
+    fn check_king_safety(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> bool {
+        if self.kind == Kind::King {
+            return true;
+        }
+
+        let mut king_pos: (u8, u8) = (8, 8);
+        let mut possible_moves: Vec<Vec<(u8, u8)>> = Vec::new();
+        let mut is_king_safe: bool = true;
+
+
+        for piece in pieces {
+            if piece.kind == Kind::King && piece.color == self.color {
+                king_pos = piece.pos;
+            } else {
+                possible_moves.push(piece.get_moves(pieces, moves, false))
+            }
+        }
+
+        for i in 0..possible_moves.len() {
+            if possible_moves[i].contains(&king_pos) {
+                is_king_safe = false;
+                break;
+            }
+        }
+
+        is_king_safe
     }
 
     fn check_king_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
