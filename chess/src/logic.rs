@@ -70,7 +70,6 @@ impl Piece {
         let mut possible_moves: Vec<Vec<(u8, u8)>> = Vec::new();
         let mut is_king_safe: bool = true;
 
-
         for piece in pieces {
             if piece.kind == Kind::King && piece.color == self.color {
                 king_pos = piece.pos;

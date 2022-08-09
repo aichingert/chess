@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::piece::{Piece, Turn, Kind};
+use crate::states::GameState;
 
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
 const LIGTH_BROWN_COLOR: Color = Color::rgb(240.0 / 255.0, 217.0 / 255.0, 181.0 / 255.0);
@@ -17,24 +18,31 @@ impl Plugin for BoardPlugin {
             .add_event::<ResetSelectedEvent>()
             .add_event::<ResetHighlightedSquaresEvent>()
             .add_event::<GameFinishedEvent>()
-            .add_startup_system(create_board)
-            .add_system(despawn_taken_pieces)
-            .add_system(select_square.label("select_square"))
-            .add_system(
-                // move_piece needs to run before select_piece
-                move_piece
-                    .after("select_square")
-                    .before("select_piece"),
+            .add_state(GameState::Loading)
+            .add_system_set(
+                SystemSet::on_enter(GameState::Loading)
+                    .with_system(create_board)
             )
-            .add_system(
-                select_piece
-                    .after("select_square")
-                    .label("select_piece"),
-            )
-            .add_system(highlight_squares)
-            .add_system(reset_selected.after("select_square"))
-            .add_system(reset_highlighted.after("select_square"))
-            .add_system(game_end.after("select_square"));
+            .add_system_set(
+                SystemSet::on_update(GameState::Playing)
+                    .with_system(despawn_taken_pieces)
+                    .with_system(select_square.label("select_square"))
+                    .with_system(
+                        // move_piece needs to run before select_piece
+                        move_piece
+                            .after("select_square")
+                            .before("select_piece"),
+                    )
+                    .with_system(
+                        select_piece
+                            .after("select_square")
+                            .label("select_piece"),
+                    )
+                    .with_system(highlight_squares)
+                    .with_system(reset_selected.after("select_square"))
+                    .with_system(reset_highlighted.after("select_square"))
+                    .with_system(game_end.after("select_square"))
+            );
     }
 }
 
@@ -79,7 +87,6 @@ pub struct GameHistory {
 
 struct ResetSelectedEvent;
 struct ResetHighlightedSquaresEvent;
-
 struct GameFinishedEvent;
 
 impl Square {
@@ -342,7 +349,8 @@ fn highlight_squares(
 }
 
 fn create_board(
-    mut commands: Commands
+    mut commands: Commands,
+    mut state: ResMut<State<GameState>>
 )   {
     // Cameras
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
@@ -394,4 +402,6 @@ fn create_board(
             }
         }
     }
+
+    state.set(GameState::Playing).unwrap();
 }
