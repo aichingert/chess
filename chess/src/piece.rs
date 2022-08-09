@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::states::GameState;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Kind {
@@ -30,10 +31,57 @@ pub struct PiecePlugin;
 
 impl Plugin for PiecePlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_pieces)
-            .add_system(move_pieces);
+        app
+            .add_startup_system(spawn_pieces)
+            .add_system_set(
+                SystemSet::on_update(GameState::Playing)
+                    .with_system(move_pieces)
+            );
     }
 }
+
+impl Default for Turn {
+    fn default() -> Self {
+        Self(PieceColor::White)
+    }
+}
+
+// has the change function after move the turn changes to the enemy color
+// white => black
+// black => white
+impl Turn {
+    pub fn change(&mut self) {
+        match self.0 {
+            PieceColor::White => {
+                self.0 = PieceColor::Black;
+            },
+            PieceColor::Black => {
+                self.0 = PieceColor::White;
+            },
+        }
+    }
+}
+
+// Implements the constructors for the a white piece and the black piece
+// also the function promotion => which promotes a pawn to any piece you want, except a pawn again and a king
+impl Piece {
+    pub fn white(kind: Kind, position: (u8, u8)) -> Piece {
+        Piece {
+            kind,
+            color: PieceColor::White,
+            pos: position,
+        }
+    }
+    
+    pub fn black(kind: Kind, position: (u8, u8)) -> Piece {
+        Piece {
+            kind,
+            color: PieceColor::Black,
+            pos: position,
+        }
+    }
+}
+
 
 fn spawn_pieces(
     mut commands: Commands,
@@ -100,48 +148,6 @@ fn spawn_pieces(
                 ..default()
             })
             .insert(Piece::black(pieces[i], (i as u8, 7)));
-    }
-}
-
-impl Default for Turn {
-    fn default() -> Self {
-        Self(PieceColor::White)
-    }
-}
-
-// has the change function after move the turn changes to the enemy color
-// white => black
-// black => white
-impl Turn {
-    pub fn change(&mut self) {
-        match self.0 {
-            PieceColor::White => {
-                self.0 = PieceColor::Black;
-            },
-            PieceColor::Black => {
-                self.0 = PieceColor::White;
-            },
-        }
-    }
-}
-
-// Implements the constructors for the a white piece and the black piece
-// also the function promotion => which promotes a pawn to any piece you want, except a pawn again and a king
-impl Piece {
-    fn white(kind: Kind, position: (u8, u8)) -> Piece {
-        Piece {
-            kind,
-            color: PieceColor::White,
-            pos: position,
-        }
-    }
-    
-    fn black(kind: Kind, position: (u8, u8)) -> Piece {
-        Piece {
-            kind,
-            color: PieceColor::Black,
-            pos: position,
-        }
     }
 }
 

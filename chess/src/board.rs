@@ -18,11 +18,7 @@ impl Plugin for BoardPlugin {
             .add_event::<ResetSelectedEvent>()
             .add_event::<ResetHighlightedSquaresEvent>()
             .add_event::<GameFinishedEvent>()
-            .add_state(GameState::Loading)
-            .add_system_set(
-                SystemSet::on_enter(GameState::Loading)
-                    .with_system(create_board)
-            )
+            .add_startup_system(create_board)
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
                     .with_system(despawn_taken_pieces)
@@ -275,11 +271,12 @@ fn move_piece(
 }
 
 fn game_end(
-    mut event_reader: EventReader<GameFinishedEvent>
+    mut event_reader: EventReader<GameFinishedEvent>,
+    mut state: ResMut<State<GameState>>
 ) {
     for _event in event_reader.iter() {
         {
-            info!("Game Finished someone won");
+            state.set(GameState::Menu).unwrap();
         }
     }
 }
@@ -350,11 +347,9 @@ fn highlight_squares(
 
 fn create_board(
     mut commands: Commands,
-    mut state: ResMut<State<GameState>>
 )   {
     // Cameras
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
-    commands.spawn_bundle(UiCameraBundle::default());
+    commands.spawn_bundle(Camera2dBundle::default());
 
     // Create Chessboard 8x8
     for row in 0..8 {
@@ -402,6 +397,4 @@ fn create_board(
             }
         }
     }
-
-    state.set(GameState::Playing).unwrap();
 }
