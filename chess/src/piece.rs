@@ -32,7 +32,10 @@ pub struct PiecePlugin;
 impl Plugin for PiecePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_startup_system(spawn_pieces)
+            .add_system_set(
+                SystemSet::on_enter(GameState::Playing)
+                    .with_system(spawn_pieces)
+            )
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
                     .with_system(move_pieces)

@@ -18,6 +18,7 @@ mod menu;
 use piece::PiecePlugin;
 use board::BoardPlugin;
 use states::GameState;
+use menu::MenuPlugin;
 
 fn main() {
     App::new()
@@ -35,6 +36,7 @@ fn main() {
         })
         .add_state(GameState::Menu)
         .add_plugins(DefaultPlugins)
+        .add_plugin(MenuPlugin)
         .add_plugin(PiecePlugin)
         .add_plugin(BoardPlugin)
         .run();

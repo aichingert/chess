@@ -18,7 +18,10 @@ impl Plugin for BoardPlugin {
             .add_event::<ResetSelectedEvent>()
             .add_event::<ResetHighlightedSquaresEvent>()
             .add_event::<GameFinishedEvent>()
-            .add_startup_system(create_board)
+            .add_system_set(
+                SystemSet::on_enter(GameState::Playing)
+                    .with_system(create_board)
+            )
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
                     .with_system(despawn_taken_pieces)
@@ -348,9 +351,6 @@ fn highlight_squares(
 fn create_board(
     mut commands: Commands,
 )   {
-    // Cameras
-    commands.spawn_bundle(Camera2dBundle::default());
-
     // Create Chessboard 8x8
     for row in 0..8 {
         for column in 0..8 {
