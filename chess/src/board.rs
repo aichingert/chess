@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::piece::{Piece, Turn};
+use crate::piece::{Piece, Turn, Kind};
 
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
 const LIGTH_BROWN_COLOR: Color = Color::rgb(240.0 / 255.0, 217.0 / 255.0, 181.0 / 255.0);
@@ -15,7 +15,8 @@ impl Plugin for BoardPlugin {
             .init_resource::<Turn>()
             .init_resource::<GameHistory>()
             .add_event::<ResetSelectedEvent>()
-            .add_event::<ResetHighlightedSquares>()
+            .add_event::<ResetHighlightedSquaresEvent>()
+            .add_event::<GameFinishedEvent>()
             .add_startup_system(create_board)
             .add_system(despawn_taken_pieces)
             .add_system(select_square.label("select_square"))
@@ -32,7 +33,8 @@ impl Plugin for BoardPlugin {
             )
             .add_system(highlight_squares)
             .add_system(reset_selected.after("select_square"))
-            .add_system(reset_highlighted.after("select_square"));
+            .add_system(reset_highlighted.after("select_square"))
+            .add_system(game_end.after("select_square"));
     }
 }
 
@@ -76,7 +78,9 @@ pub struct GameHistory {
 }
 
 struct ResetSelectedEvent;
-struct ResetHighlightedSquares;
+struct ResetHighlightedSquaresEvent;
+
+struct GameFinishedEvent;
 
 impl Square {
     fn new(x: u8, y: u8) -> Self {
@@ -102,7 +106,7 @@ fn select_square(
     mut selected_square: ResMut<SelectedSquare>,
     mut squares_query: Query<(Entity, &Square)>,
     windows: Res<Windows>,
-    mut reset_highlighted_event: EventWriter<ResetHighlightedSquares>
+    mut reset_highlighted_event: EventWriter<ResetHighlightedSquaresEvent>
 ) {
     // Only run if the left button is pressed
     if !mouse_button_inputs.just_pressed(MouseButton::Left) {
@@ -122,7 +126,7 @@ fn select_square(
         });
     }
 
-    reset_highlighted_event.send(ResetHighlightedSquares);
+    reset_highlighted_event.send(ResetHighlightedSquaresEvent);
 }
 
 fn select_piece(
@@ -193,7 +197,8 @@ fn move_piece(
     squares_query: Query<&Square>,
     mut pieces_query: Query<(Entity, &mut Piece)>,
     mut reset_selected_event: EventWriter<ResetSelectedEvent>,
-    mut reset_highlighted_event: EventWriter<ResetHighlightedSquares>,
+    mut reset_highlighted_event: EventWriter<ResetHighlightedSquaresEvent>,
+    mut game_finished_event: EventWriter<GameFinishedEvent>,
     mut game_history: ResMut<GameHistory>
 ) {
     if !selected_square.is_changed() {
@@ -201,7 +206,7 @@ fn move_piece(
     }
 
     // Removing the highlighted spots from the board
-    reset_highlighted_event.send(ResetHighlightedSquares);
+    reset_highlighted_event.send(ResetHighlightedSquaresEvent);
 
     let square_entity = if let Some(entity) = selected_square.entity {
         entity
@@ -240,6 +245,10 @@ fn move_piece(
                     && other_piece.color != piece.color
                 {
                     // Mark the piece as taken
+                    if other_piece.kind == Kind::King {
+                        game_finished_event.send(GameFinishedEvent)
+                    }
+
                     commands.entity(other_entity).insert(Taken);
                 }
             }
@@ -258,6 +267,16 @@ fn move_piece(
     }
 }
 
+fn game_end(
+    mut event_reader: EventReader<GameFinishedEvent>
+) {
+    for _event in event_reader.iter() {
+        {
+            info!("Game Finished someone won");
+        }
+    }
+}
+
 fn reset_selected(
     mut event_reader: EventReader<ResetSelectedEvent>,
     mut selected_square: ResMut<SelectedSquare>,
@@ -273,7 +292,7 @@ fn reset_highlighted(
     point_query: Query<(Entity, &Point)>,
     square_query: Query<(Entity, &Square, &Highlight)>,
     mut commands: Commands,
-    mut event_reader: EventReader<ResetHighlightedSquares>
+    mut event_reader: EventReader<ResetHighlightedSquaresEvent>
 ) {
     for _event in event_reader.iter() {
         for (entity, _, _) in square_query.iter() {
