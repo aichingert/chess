@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::piece::{Piece, Turn, Kind};
+use crate::piece::{Piece, Turn, Kind, PieceColor};
 use crate::states::GameState;
 
 const BROWN_COLOR: Color = Color::rgb(181.0 / 255.0, 136.0 / 255.0, 99.0 / 255.0);
@@ -15,6 +15,7 @@ impl Plugin for BoardPlugin {
             .init_resource::<SelectedPiece>()
             .init_resource::<Turn>()
             .init_resource::<GameHistory>()
+            .init_resource::<Winner>()
             .add_event::<ResetSelectedEvent>()
             .add_event::<ResetHighlightedSquaresEvent>()
             .add_event::<GameFinishedEvent>()
@@ -41,6 +42,10 @@ impl Plugin for BoardPlugin {
                     .with_system(reset_selected.after("select_square"))
                     .with_system(reset_highlighted.after("select_square"))
                     .with_system(game_end.after("select_square"))
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameState::Playing)
+                    .with_system(cleanup_board)
             );
     }
 }
@@ -70,6 +75,11 @@ struct SelectedSquare {
 #[derive(Default)]
 struct SelectedPiece {
     entity: Option<Entity>
+}
+
+#[derive(Default, Debug)]
+pub struct Winner {
+    winner: Option<PieceColor>
 }
 
 #[derive(Debug, Clone)]
@@ -275,10 +285,12 @@ fn move_piece(
 
 fn game_end(
     mut event_reader: EventReader<GameFinishedEvent>,
-    mut state: ResMut<State<GameState>>
+    mut state: ResMut<State<GameState>>,
+    mut winner: ResMut<Winner>
 ) {
     for _event in event_reader.iter() {
         {
+            winner.winner = Some(PieceColor::White);
             state.set(GameState::Menu).unwrap();
         }
     }
@@ -323,6 +335,15 @@ fn despawn_taken_pieces(
     }
 }
 
+fn cleanup_board(
+    mut commands: Commands,
+    square_query: Query<(Entity, &Square)>
+) {
+    for (entity, _) in square_query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
 fn highlight_squares(
     query: Query<(&Square, &Highlight)>,
     mut commands: Commands
@@ -362,38 +383,38 @@ fn create_board(
             if (row + column) % 2 != 0 {
                 // Insert brown square
                 commands
-                .spawn()
-                .insert(Square::new(row, column))
-                .insert_bundle(SpriteBundle {
-                    sprite: Sprite {
-                        color: LIGTH_BROWN_COLOR,
+                    .spawn()
+                    .insert(Square::new(row, column))
+                    .insert_bundle(SpriteBundle {
+                        sprite: Sprite {
+                            color: LIGTH_BROWN_COLOR,
+                            ..default()
+                        },
+                        transform: Transform {
+                            translation: square_position.extend(0.0),
+                            scale: Vec3::new(super::SQUARE_SIZE, super::SQUARE_SIZE, 0.0),
+                            ..default()
+                        },
                         ..default()
-                    },
-                    transform: Transform {
-                        translation: square_position.extend(0.0),
-                        scale: Vec3::new(super::SQUARE_SIZE, super::SQUARE_SIZE, 0.0),
-                        ..default()
-                    },
-                    ..default()
-                });
+                    });
             }
             else {
                 // Insert white square 
                 commands
-                .spawn()
-                .insert(Square::new(row, column))
-                .insert_bundle(SpriteBundle {
-                    sprite: Sprite {
-                        color: BROWN_COLOR,
+                    .spawn()
+                    .insert(Square::new(row, column))
+                    .insert_bundle(SpriteBundle {
+                        sprite: Sprite {
+                            color: BROWN_COLOR,
+                            ..default()
+                        },
+                        transform: Transform {
+                            translation: square_position.extend(0.0),
+                            scale: Vec3::new(super::SQUARE_SIZE, super::SQUARE_SIZE, 1.0),
+                            ..default()
+                        },
                         ..default()
-                    },
-                    transform: Transform {
-                        translation: square_position.extend(0.0),
-                        scale: Vec3::new(super::SQUARE_SIZE, super::SQUARE_SIZE, 1.0),
-                        ..default()
-                    },
-                    ..default()
-                });
+                    });
             }
         }
     }

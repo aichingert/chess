@@ -6,6 +6,7 @@ pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_startup_system(spawn_camera)
             .add_system_set(
                 SystemSet::on_enter(GameState::Menu)
                     .with_system(setup_menu)
@@ -21,12 +22,16 @@ impl Plugin for MenuPlugin {
     }
 }
 
+fn spawn_camera(
+    mut commands: Commands,
+) {
+    commands.spawn_bundle(Camera2dBundle::default());
+}
+
 fn setup_menu(
     mut commands: Commands,
     asset_server: Res<AssetServer>
 ) {
-    commands.spawn_bundle(Camera2dBundle::default());
-
     commands
         .spawn_bundle(ButtonBundle {
             style: Style {
@@ -36,7 +41,7 @@ fn setup_menu(
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            color: Color::rgb(1.0, 0.0, 0.0).into(),
+            color: Color::rgb(0.9, 0.9, 0.9).into(),
             ..Default::default()
         })
         .with_children(|parent| {

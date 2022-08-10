@@ -1,6 +1,24 @@
 use bevy::prelude::*;
 use crate::states::GameState;
 
+impl Plugin for PiecePlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .add_system_set(
+                SystemSet::on_enter(GameState::Playing)
+                    .with_system(spawn_pieces)
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::Playing)
+                    .with_system(move_pieces)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameState::Playing)
+                    .with_system(cleanup_pieces)
+            );
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Kind {
     Queen,
@@ -28,20 +46,6 @@ pub struct Piece {
 pub struct Turn(pub PieceColor);
 
 pub struct PiecePlugin;
-
-impl Plugin for PiecePlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_system_set(
-                SystemSet::on_enter(GameState::Playing)
-                    .with_system(spawn_pieces)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::Playing)
-                    .with_system(move_pieces)
-            );
-    }
-}
 
 impl Default for Turn {
     fn default() -> Self {
@@ -170,5 +174,14 @@ fn move_pieces(_time: Res<Time>, mut query: Query<(&mut Transform, &Piece)>) {
                 transform.translation += direction.normalize() * (time.delta_seconds() * 100.);
             }
         */
+    }
+}
+
+fn cleanup_pieces(
+    mut commands: Commands,
+    piece_query: Query<(Entity, &Piece)>
+) {
+    for (entity, _) in piece_query.iter() {
+        commands.entity(entity).despawn_recursive();
     }
 }
