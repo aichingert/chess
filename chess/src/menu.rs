@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use crate::states::GameState;
+use crate::board::Winner;
+use crate::piece::PieceColor;
 
-pub struct MenuPlugin;
+const BUTTON_COLOR: Color = Color::WHITE;
+const TEXT_COLOR: Color = Color::WHITE;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
@@ -22,6 +25,11 @@ impl Plugin for MenuPlugin {
     }
 }
 
+pub struct MenuPlugin;
+
+#[derive(Component)]
+struct TextComponent;
+
 fn spawn_camera(
     mut commands: Commands,
 ) {
@@ -30,8 +38,40 @@ fn spawn_camera(
 
 fn setup_menu(
     mut commands: Commands,
-    asset_server: Res<AssetServer>
+    materials: Res<AssetServer>,
+    mut winner: ResMut<Winner>,
 ) {
+    let text_style = TextStyle {
+        font: materials.load("fonts/FiraSans-Bold.ttf"),
+        font_size: 60.0,
+        color: TEXT_COLOR,
+    };
+
+    if let Some(color) = winner.winner {
+        let box_size = Vec2::new(300.0, 200.0);
+        let box_position = Vec2::new(0.0, -250.0);
+
+        commands.spawn_bundle(Text2dBundle {
+            text: Text::from_section(match color {
+                PieceColor::White => "White won",
+                PieceColor::Black => "Black won"
+            }, text_style),
+            text_2d_bounds: bevy::text::Text2dBounds {
+                // Wrap text in the rectangle
+                size: box_size,
+            },
+            transform: Transform::from_xyz(
+                box_position.x - box_size.x / 2.0,
+                box_position.y + box_size.y / 2.0,
+                1.0,
+            ),
+            ..default()
+        })
+        .insert(TextComponent);
+
+        winner.winner = None;
+    }
+
     commands
         .spawn_bundle(ButtonBundle {
             style: Style {
@@ -41,7 +81,7 @@ fn setup_menu(
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            color: Color::rgb(0.9, 0.9, 0.9).into(),
+            color: BUTTON_COLOR.into(),
             ..Default::default()
         })
         .with_children(|parent| {
@@ -50,9 +90,9 @@ fn setup_menu(
                     sections: vec![TextSection {
                         value: "Play".to_string(),
                         style: TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font: materials.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 40.0,
-                            color: Color::rgb(1.0, 0.0, 0.0),
+                            color: BUTTON_COLOR,
                         },
                     }],
                     alignment: Default::default(),
@@ -84,6 +124,13 @@ fn click_play_button(
     }
 }
 
-fn cleanup_menu(mut commands: Commands, button: Query<Entity, With<Button>>) {
+fn cleanup_menu(
+    mut commands: Commands, 
+    button: Query<Entity, With<Button>>,
+    text: Query<Entity, With<TextComponent>>
+) {
     commands.entity(button.single()).despawn_recursive();
+    for entity in text.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
 }

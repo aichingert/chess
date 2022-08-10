@@ -46,6 +46,7 @@ impl Plugin for BoardPlugin {
             .add_system_set(
                 SystemSet::on_exit(GameState::Playing)
                     .with_system(cleanup_board)
+                    .with_system(reset_highlighted)
             );
     }
 }
@@ -79,7 +80,7 @@ struct SelectedPiece {
 
 #[derive(Default, Debug)]
 pub struct Winner {
-    winner: Option<PieceColor>
+    pub winner: Option<PieceColor>
 }
 
 #[derive(Debug, Clone)]
@@ -215,7 +216,8 @@ fn move_piece(
     mut reset_selected_event: EventWriter<ResetSelectedEvent>,
     mut reset_highlighted_event: EventWriter<ResetHighlightedSquaresEvent>,
     mut game_finished_event: EventWriter<GameFinishedEvent>,
-    mut game_history: ResMut<GameHistory>
+    mut game_history: ResMut<GameHistory>,
+    mut winner: ResMut<Winner>
 ) {
     if !selected_square.is_changed() {
         return;
@@ -262,6 +264,10 @@ fn move_piece(
                 {
                     // Mark the piece as taken
                     if other_piece.kind == Kind::King {
+                        winner.winner = Some(match other_piece.color {
+                            PieceColor::White => PieceColor::Black,
+                            PieceColor::Black => PieceColor::White
+                        });
                         game_finished_event.send(GameFinishedEvent)
                     }
 
@@ -285,12 +291,23 @@ fn move_piece(
 
 fn game_end(
     mut event_reader: EventReader<GameFinishedEvent>,
+    mut turn: ResMut<Turn>,
     mut state: ResMut<State<GameState>>,
-    mut winner: ResMut<Winner>
+    winner: Res<Winner>
 ) {
     for _event in event_reader.iter() {
         {
-            winner.winner = Some(PieceColor::White);
+            if let Some(color) = winner.winner {
+                turn.0 = match color {
+                    PieceColor::White => {
+                        PieceColor::Black
+                    },
+                    PieceColor::Black => {
+                        PieceColor::White
+                    },
+                };
+            }
+
             state.set(GameState::Menu).unwrap();
         }
     }
