@@ -4,7 +4,6 @@ use crate::board::Winner;
 use crate::piece::PieceColor;
 
 const BUTTON_COLOR: Color = Color::WHITE;
-const TEXT_COLOR: Color = Color::WHITE;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
@@ -44,7 +43,7 @@ fn setup_menu(
     let text_style = TextStyle {
         font: materials.load("fonts/FiraSans-Bold.ttf"),
         font_size: 60.0,
-        color: TEXT_COLOR,
+        color: super::TEXT_COLOR,
     };
 
     if let Some(color) = winner.winner {
