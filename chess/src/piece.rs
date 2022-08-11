@@ -106,7 +106,7 @@ fn spawn_pieces(
             .spawn_bundle(SpriteBundle {
                 texture: asset_server.load("white/pawn.png"),
                 transform: Transform {
-                    translation: Vec3::new(super::OFFSET + i as f32 * super::SQUARE_SIZE, super::OFFSET + super::SQUARE_SIZE, 1.0),
+                    translation: Vec3::new(super::OFFSET + (i as f32 + super::X_OFFSET) * super::SQUARE_SIZE, super::OFFSET + super::SQUARE_SIZE, 1.0),
                     scale: Vec3::new(0.4, 0.4, 1.0),
                     ..default()
                 },
@@ -118,7 +118,7 @@ fn spawn_pieces(
             .spawn_bundle(SpriteBundle {
                 texture: asset_server.load("black/pawn.png"),
                 transform: Transform {
-                    translation: Vec3::new(super::OFFSET + i as f32 * super::SQUARE_SIZE, super::OFFSET + super::SQUARE_SIZE * 6.0, 0.0),
+                    translation: Vec3::new(super::OFFSET + (i as f32 + super::X_OFFSET) * super::SQUARE_SIZE, super::OFFSET + 6.0 * super::SQUARE_SIZE, 1.0),
                     scale: Vec3::new(0.4, 0.4, 1.0),
                     ..default()
                 },
@@ -136,7 +136,7 @@ fn spawn_pieces(
             .spawn_bundle(SpriteBundle {
                 texture: asset_server.load(&format!("white/{}", path[i])),
                 transform: Transform {
-                    translation: Vec3::new(super::OFFSET + i as f32 * super::SQUARE_SIZE, super::OFFSET, 1.0),
+                    translation: Vec3::new(super::OFFSET + (i as f32 + super::X_OFFSET) * super::SQUARE_SIZE, super::OFFSET, 1.0),
                     scale: Vec3::new(0.4, 0.3, 1.0),
                     ..default()
                 },
@@ -148,7 +148,7 @@ fn spawn_pieces(
             .spawn_bundle(SpriteBundle {
                 texture: asset_server.load(&format!("black/{}", path[i])),
                 transform: Transform {
-                    translation: Vec3::new(super::OFFSET + i as f32 * super::SQUARE_SIZE, super::OFFSET + 7.0 * super::SQUARE_SIZE, 1.0),
+                    translation: Vec3::new(super::OFFSET + (i as f32 + super::X_OFFSET) * super::SQUARE_SIZE, super::OFFSET + 7.0 * super::SQUARE_SIZE, 1.0),
                     scale: Vec3::new(0.4, 0.3, 1.0),
                     ..default()
                 },
@@ -161,7 +161,7 @@ fn spawn_pieces(
 fn move_pieces(_time: Res<Time>, mut query: Query<(&mut Transform, &Piece)>) {
     for (mut transform, piece) in query.iter_mut() {
         if transform.translation.x != piece.pos.0 as f32 && transform.translation.y != piece.pos.1 as f32 {
-            transform.translation = Vec3::new(super::OFFSET + piece.pos.0 as f32 * super::SQUARE_SIZE, super::OFFSET + piece.pos.1 as f32 * super::SQUARE_SIZE, 1.0);
+            transform.translation = Vec3::new(super::OFFSET + (piece.pos.0 as f32 + super::X_OFFSET) * super::SQUARE_SIZE, super::OFFSET + piece.pos.1 as f32 * super::SQUARE_SIZE, 1.0);
         }
 
         /* if you want to see the pieces moving
