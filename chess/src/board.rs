@@ -97,7 +97,7 @@ pub struct GameHistory {
 
 struct ResetSelectedEvent;
 struct ResetHighlightedSquaresEvent;
-struct GameFinishedEvent;
+pub struct GameFinishedEvent;
 
 impl Square {
     fn new(x: u8, y: u8) -> Self {
@@ -293,7 +293,7 @@ fn move_piece(
     }
 }
 
-fn game_end(
+pub fn game_end(
     mut event_reader: EventReader<GameFinishedEvent>,
     mut turn: ResMut<Turn>,
     mut state: ResMut<State<GameState>>,

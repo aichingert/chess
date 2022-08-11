@@ -1,10 +1,8 @@
-use bevy::{
-    prelude::*,
-    time::FixedTimestep,
-};
+use bevy::prelude::*;
 
 use crate::piece::{PieceColor, Turn};
 use crate::states::GameState;
+use crate::board::{GameFinishedEvent, Winner};
 
 impl Plugin for TimerPlugin {
     fn build(&self, app: &mut App) {
@@ -15,7 +13,6 @@ impl Plugin for TimerPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
-                    .with_run_criteria(FixedTimestep::step(super::FPS))
                     .with_system(update_timer)
             )
             .add_system_set(
@@ -29,7 +26,7 @@ pub struct TimerPlugin;
 
 #[derive(Component, Default, Debug, Clone, Copy)]
 pub struct Timer {
-    time: i32,
+    time: f32,
     id: u8
 }
 
@@ -44,8 +41,8 @@ impl Timer {
 
 impl Into<std::string::String> for Timer {
     fn into(self) -> std::string::String {
-        let minutes: i32 = self.time / 60;
-        let seconds: i32 = self.time % 60;
+        let minutes: i32 = self.time as i32 / 60;
+        let seconds: i32 = self.time as i32 % 60;
 
         format!("{minutes}:{:02}", seconds)
     }
@@ -53,8 +50,8 @@ impl Into<std::string::String> for Timer {
 
 impl std::fmt::Display for Timer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let minutes: i32 = self.time / 60;
-        let seconds: i32 = self.time % 60;
+        let minutes: i32 = self.time as i32 / 60;
+        let seconds: i32 = self.time as i32 % 60;
         
         write!(f, "{minutes}:{:02}", seconds)
     }
@@ -71,7 +68,7 @@ fn setup_timer(
     };
 
     let box_size = Vec2::new(300.0, 200.0);
-    let mut box_position = Vec2::new(-350.0, 150.0);
+    let mut box_position = Vec2::new(-350.0, -50.0);
 
     let white_timer: Timer = Timer::new(1);
     let black_timer: Timer = Timer::new(2);
@@ -91,7 +88,7 @@ fn setup_timer(
     })
     .insert(white_timer);
 
-    box_position = Vec2::new(-350.0, -50.0);
+    box_position = Vec2::new(-350.0, 150.0);
 
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(black_timer, text_style),
@@ -110,8 +107,9 @@ fn setup_timer(
 }
 
 fn update_timer(
-    mut commands: Commands,
     mut timer_query: Query<(&mut Text, &mut Timer)>,
+    mut game_end_event: EventWriter<GameFinishedEvent>,
+    mut winner: ResMut<Winner>,
     turn: Res<Turn>,
     time: Res<Time>
 ) {
@@ -124,15 +122,20 @@ fn update_timer(
     }
 
     for (mut text, mut timer) in timer_query.iter_mut() {
+        if timer.time <= 0.0 {
+            winner.winner = Some( match turn.0 {
+                PieceColor::Black => PieceColor::White,
+                PieceColor::White => PieceColor::Black,
+            });
+            game_end_event.send(GameFinishedEvent);
+        }
+
         if timer.id == timer_id {
-            info!("{}", time.delta_seconds());
-            timer.time -= 1;
+            timer.time -= time.delta_seconds();
         }
 
         text.sections[0].value = timer.to_string();
     }
-
-    info!("{:?}", turn.0);
 }
 
 fn cleanup_timer(
