@@ -133,7 +133,11 @@ fn select_square(
     let window: &Window = windows.get_primary().unwrap();
 
     if let Some(pos) = window.cursor_position() {
-        let x: u8 = (pos.x / super::SQUARE_SIZE) as u8;
+        if pos.x <= 299.0 {
+            return;
+        }
+
+        let x: u8 = ((pos.x - (super::MARGIN * super::SQUARE_SIZE)) / super::SQUARE_SIZE) as u8;
         let y: u8 = (pos.y / super::SQUARE_SIZE) as u8;
 
         squares_query.for_each_mut( | (entity, square) | {
@@ -366,7 +370,7 @@ fn highlight_squares(
     mut commands: Commands
 ) {
     query.for_each( | (square, _) | {
-        let position = Vec3::new(super::OFFSET + square.x as f32 * super::SQUARE_SIZE, super::OFFSET + square.y as f32 * super::SQUARE_SIZE, 1.0);
+        let position = Vec3::new(super::OFFSET + (square.x as f32 + super::X_OFFSET) * super::SQUARE_SIZE, super::OFFSET + square.y as f32 * super::SQUARE_SIZE, 1.0);
 
         commands
             .spawn()
