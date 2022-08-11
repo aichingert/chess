@@ -1,10 +1,27 @@
-use bevy::prelude::*;
-use crate::piece::PieceColor;
+use bevy::{
+    prelude::*,
+    time::FixedTimestep,
+};
+
+use crate::piece::{PieceColor, Turn};
+use crate::states::GameState;
 
 impl Plugin for TimerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_startup_system(setup_timer);
+            .add_system_set(
+                SystemSet::on_enter(GameState::Playing)
+                    .with_system(setup_timer)
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::Playing)
+                    .with_run_criteria(FixedTimestep::step(super::FPS))
+                    .with_system(update_timer)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameState::Playing)
+                    .with_system(cleanup_timer)
+            );
     }
 }
 
@@ -31,6 +48,15 @@ impl Into<std::string::String> for Timer {
         let seconds: i32 = self.time % 60;
 
         format!("{minutes}:{:02}", seconds)
+    }
+}
+
+impl std::fmt::Display for Timer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let minutes: i32 = self.time / 60;
+        let seconds: i32 = self.time % 60;
+        
+        write!(f, "{minutes}:{:02}", seconds)
     }
 }
 
@@ -81,4 +107,39 @@ fn setup_timer(
         ..default()
     })
     .insert(black_timer);
+}
+
+fn update_timer(
+    mut commands: Commands,
+    mut timer_query: Query<(&mut Text, &mut Timer)>,
+    turn: Res<Turn>,
+    time: Res<Time>
+) {
+    let timer_id: u8;
+
+    if turn.0 == PieceColor::White {
+        timer_id = 1;
+    } else {
+        timer_id = 2;
+    }
+
+    for (mut text, mut timer) in timer_query.iter_mut() {
+        if timer.id == timer_id {
+            info!("{}", time.delta_seconds());
+            timer.time -= 1;
+        }
+
+        text.sections[0].value = timer.to_string();
+    }
+
+    info!("{:?}", turn.0);
+}
+
+fn cleanup_timer(
+    mut commands: Commands,
+    timer_query: Query<(Entity, &Timer)>
+) {
+    for (entity, _) in timer_query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
 }

@@ -17,6 +17,7 @@ const BACKGROUND_COLOR: Color = Color::rgb(0.0, 0.0, 0.0);
 const TEXT_COLOR: Color = Color::WHITE;
 
 const TIME_PER_PLAYER: i32 = 180;
+const FPS: f64 = 1.0;
 
 mod piece;
 mod board;
