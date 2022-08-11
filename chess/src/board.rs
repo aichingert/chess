@@ -393,7 +393,7 @@ fn create_board(
     for row in 0..8 {
         for column in 0..8 {
             let square_position = Vec2::new(
-                super::OFFSET + column as f32 * (super::SQUARE_SIZE),
+                super::OFFSET + (column as f32 + super::X_OFFSET / 2.0) * super::SQUARE_SIZE,
                 super::OFFSET + row as f32 * (super::SQUARE_SIZE),
             );
 

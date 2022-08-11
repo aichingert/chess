@@ -3,11 +3,13 @@ By:             Tobias Aichinger
 Bevy version:   "0.7" / 2022
 */
 
-use bevy::{prelude::*, window::WindowResizeConstraints};
+use bevy::prelude::*;
 
 // Calculate offset because piece is always placed in the middle
 const OFFSET: f32 = (-(8 as f32 / 2.0 * SQUARE_SIZE)) + SQUARE_SIZE / 2.;
+const X_OFFSET: f32 = 4.0;
 const SQUARE_SIZE: f32 = 75.0;
+const BACKGROUND_COLOR: Color = Color::rgb(0.0, 0.0, 0.0);
 
 mod piece;
 mod board;
@@ -24,16 +26,12 @@ fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
             title: "chess".to_string(),
-            width: SQUARE_SIZE * 8.0,
+            width: SQUARE_SIZE * (8.0 + X_OFFSET),
             height: SQUARE_SIZE * 8.0,
-            resize_constraints: WindowResizeConstraints {
-                min_width: SQUARE_SIZE * 8.0,
-                min_height: SQUARE_SIZE * 8.0,
-                max_width: SQUARE_SIZE * 8.0,
-                max_height: SQUARE_SIZE * 8.0,
-            },
+            resizable: false,
             ..default()
         })
+        .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_state(GameState::Menu)
         .add_plugins(DefaultPlugins)
         .add_plugin(MenuPlugin)

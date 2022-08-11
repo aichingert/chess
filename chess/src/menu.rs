@@ -49,7 +49,7 @@ fn setup_menu(
 
     if let Some(color) = winner.winner {
         let box_size = Vec2::new(300.0, 200.0);
-        let box_position = Vec2::new(0.0, -250.0);
+        let box_position = Vec2::new(30.0, 20.0);
 
         commands.spawn_bundle(Text2dBundle {
             text: Text::from_section(match color {
