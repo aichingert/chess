@@ -62,30 +62,24 @@ impl Piece {
     }
 
     fn check_king_safety(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> bool {
-        if self.kind == Kind::King {
-            return true;
-        }
+        let king_pos: (u8, u8) = Piece::get_king_position(pieces, self.color);
 
-        let mut king_pos: (u8, u8) = (8, 8);
         let mut possible_moves: Vec<Vec<(u8, u8)>> = Vec::new();
         let mut is_king_safe: bool = true;
 
-        for piece in pieces {
-            if piece.kind == Kind::King && piece.color == self.color {
-                king_pos = piece.pos;
-            } else {
-                possible_moves.push(piece.get_moves(pieces, moves, false))
-            }
-        }
-
-        for i in 0..possible_moves.len() {
-            if possible_moves[i].contains(&king_pos) {
-                is_king_safe = false;
-                break;
-            }
-        }
-
         is_king_safe
+    }
+
+    fn get_king_position(pieces: &Vec<Piece>, searching: PieceColor) -> (u8, u8) {
+        let king_pos: (u8, u8) = (8, 8);
+
+        for i in 0..pieces.len() {
+            if pieces[i].kind == Kind::King && pieces[i].color == searching {
+                return pieces[i].pos;
+            }
+        }
+
+        king_pos
     }
 
     fn check_king_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
