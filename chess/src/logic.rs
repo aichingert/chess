@@ -29,9 +29,10 @@ impl Piece {
     pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>, check_safety: bool) -> Vec<(u8, u8)> {
         let mut possible_moves: Vec<(u8, u8)> = Vec::new();
 
-        if check_safety && !self.check_king_safety(pieces, moves) {
-            return vec![];
+        if check_safety {
+            //possible_moves = self.check_king_safety(pieces, moves);
         }
+
         match self.kind {
             Kind::Queen => {
                 self.check_horizontal(pieces).iter().for_each( | pos | possible_moves.push(*pos));
@@ -40,7 +41,7 @@ impl Piece {
                 self.check_diagonal_left(pieces).iter().for_each( | pos | possible_moves.push(*pos));
             },
             Kind::King => {
-                self.check_king_moves(pieces).iter().for_each( | pos | possible_moves.push(*pos));
+                self.check_king_moves(moves, pieces).iter().for_each( | pos | possible_moves.push(*pos));
             },
             Kind::Rook => {
                 self.check_horizontal(pieces).iter().for_each( | pos | possible_moves.push(*pos));
@@ -61,13 +62,23 @@ impl Piece {
         possible_moves
     }
 
-    fn check_king_safety(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> bool {
+    fn check_king_safety(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<(u8, u8)> {
         let king_pos: (u8, u8) = Piece::get_king_position(pieces, self.color);
 
-        let mut possible_moves: Vec<Vec<(u8, u8)>> = Vec::new();
-        let mut is_king_safe: bool = true;
+        println!("{:?}", king_pos);
 
-        is_king_safe
+        let mut possible_enemy_moves: Vec<Vec<(u8, u8)>> = Vec::new();
+        let mut possible_team_moves: Vec<Vec<(u8, u8)>> = Vec::new();
+
+        for i in 0..pieces.len() {
+            if pieces[i].color != self.color {
+                possible_enemy_moves.push(pieces[i].get_moves(pieces, moves, false));
+            } else {
+                possible_team_moves.push(pieces[i].get_moves(pieces, moves, false));
+            }
+        }
+
+        Vec::new()
     }
 
     fn get_king_position(pieces: &Vec<Piece>, searching: PieceColor) -> (u8, u8) {
@@ -82,7 +93,7 @@ impl Piece {
         king_pos
     }
 
-    fn check_king_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
+    fn check_king_moves(&self, moves: &Vec<Move>, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
         let mut possible_moves: Vec<(u8, u8)> = Vec::new();
 
         for i in -1..2 {
@@ -116,6 +127,23 @@ impl Piece {
                 possible_moves.remove(i);
                 break;
             }
+        }
+
+        let mut possible_enemy_moves: Vec<Vec<(u8, u8)>> = Vec::new();
+
+        for i in 0..pieces.len() {
+            if pieces[i].color != self.color && pieces[i].kind != Kind::King {
+                possible_enemy_moves.push(pieces[i].get_moves(pieces, moves, false));
+            }
+        }
+
+        for mut i in 0..possible_moves.len() {
+            for j in 0..possible_enemy_moves.len() {
+                if possible_enemy_moves[j].contains(&possible_moves[i]) {
+                    possible_moves.remove(i);
+                    i -= 1;
+                }
+            }   
         }
 
         possible_moves
