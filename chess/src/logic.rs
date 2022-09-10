@@ -97,11 +97,14 @@ impl Piece {
             }
         }
 
+        println!("{:?}", king_moves);
+
         match under_check {
             1 => {
                 for i in 0..king_moves.len() {
                     for j in 0..possible_enemy_moves.len() {
                         if possible_enemy_moves[j].contains(&king_moves[i]) {
+                            println!("{:?}", king_moves[i]);
                             index.push(i - offset);
                             offset += 1;
                         }
