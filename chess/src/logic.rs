@@ -6,7 +6,7 @@ impl Piece {
         let moves: Vec<(u8, u8)> = self.get_moves(pieces, game_history, true);
         let mut en_passant: i8 = 0;
 
-        if game_history.len() > 0 {
+        if game_history.len() > 1 {
             let last_move: &Move = &game_history[game_history.len() - 1];
 
             match self.color {
@@ -78,19 +78,27 @@ impl Piece {
             }
         }
 
-        Vec::new()
-    }
-
-    fn get_king_position(pieces: &Vec<Piece>, searching: PieceColor) -> (u8, u8) {
-        let king_pos: (u8, u8) = (8, 8);
-
-        for i in 0..pieces.len() {
-            if pieces[i].kind == Kind::King && pieces[i].color == searching {
-                return pieces[i].pos;
+        for i in 0..possible_enemy_moves.len() {
+            if possible_enemy_moves[i].contains(&king_pos) {
+                for j in 0..possible_enemy_moves[i].len() {
+                    if possible_enemy_moves[i][j] == king_pos {
+                        
+                    }
+                }
             }
         }
 
-        king_pos
+        Vec::new()
+    }
+
+    fn get_king(pieces: &Vec<Piece>, searching: PieceColor) -> Piece {
+        for i in 0..pieces.len() {
+            if pieces[i].kind == Kind::King && pieces[i].color == searching {
+                return pieces[i];
+            }
+        }
+
+        panic!("no kind found!");
     }
 
     fn check_king_moves(&self, moves: &Vec<Move>, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
