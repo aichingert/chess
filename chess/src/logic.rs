@@ -28,9 +28,14 @@ impl Piece {
 
     pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>, check_safety: bool) -> Vec<(u8, u8)> {
         let mut possible_moves: Vec<(u8, u8)> = Vec::new();
+        let result: bool;
 
         if check_safety {
-            //possible_moves = self.check_king_safety(pieces, moves);
+            (possible_moves, result)  = self.check_king_safety(pieces, moves);
+
+            if result {
+                return possible_moves;
+            }
         }
 
         match self.kind {
@@ -62,10 +67,12 @@ impl Piece {
         possible_moves
     }
 
-    fn check_king_safety(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<(u8, u8)> {
-        let king_pos: (u8, u8) = Piece::get_king_position(pieces, self.color);
-
-        println!("{:?}", king_pos);
+    fn check_king_safety(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> (Vec<(u8, u8)>, bool) {
+        let king: Piece = match self.kind {
+            Kind::King => self.clone(),
+            _ => Piece::get_king(pieces, self.color),
+        };
+        let mut checked: bool = false;
 
         let mut possible_enemy_moves: Vec<Vec<(u8, u8)>> = Vec::new();
         let mut possible_team_moves: Vec<Vec<(u8, u8)>> = Vec::new();
@@ -78,23 +85,47 @@ impl Piece {
             }
         }
 
+        let mut king_moves: Vec<(u8, u8)> = king.get_moves(pieces, moves, false);
+        let mut under_check: u8 = 0;
+        let mut index: Vec<usize> = vec![];
+        let mut offset: usize = 0;
+
         for i in 0..possible_enemy_moves.len() {
-            if possible_enemy_moves[i].contains(&king_pos) {
-                for j in 0..possible_enemy_moves[i].len() {
-                    if possible_enemy_moves[i][j] == king_pos {
-                        
-                    }
-                }
+            if possible_enemy_moves[i].contains(&king.pos) {
+                under_check += 1;
+                checked = true;
             }
         }
 
-        Vec::new()
+        match under_check {
+            1 => {
+                for i in 0..king_moves.len() {
+                    for j in 0..possible_enemy_moves.len() {
+                        if possible_enemy_moves[j].contains(&king_moves[i]) {
+                            index.push(i - offset);
+                            offset += 1;
+                        }
+                    }
+                }
+
+
+            },
+            _ => {
+
+            }
+        }
+
+        for i in 0..index.len() {
+            king_moves.remove(index[i]);
+        }
+
+        (king_moves, checked)
     }
 
     fn get_king(pieces: &Vec<Piece>, searching: PieceColor) -> Piece {
         for i in 0..pieces.len() {
             if pieces[i].kind == Kind::King && pieces[i].color == searching {
-                return pieces[i];
+                return pieces[i].clone();
             }
         }
 
@@ -138,6 +169,8 @@ impl Piece {
         }
 
         let mut possible_enemy_moves: Vec<Vec<(u8, u8)>> = Vec::new();
+        let mut index: Vec<usize> = vec![];
+        let mut offset: usize = 0;
 
         for i in 0..pieces.len() {
             if pieces[i].color != self.color && pieces[i].kind != Kind::King {
@@ -145,13 +178,19 @@ impl Piece {
             }
         }
 
-        for mut i in 0..possible_moves.len() {
+        for i in 0..possible_moves.len() {
             for j in 0..possible_enemy_moves.len() {
                 if possible_enemy_moves[j].contains(&possible_moves[i]) {
-                    possible_moves.remove(i);
-                    i -= 1;
+                    index.push(i);
                 }
             }   
+        }
+
+        for i in 0..index.len() {
+            possible_moves.remove(index[i - offset]);
+            if offset <= i {
+                offset += 1;
+            }
         }
 
         possible_moves
