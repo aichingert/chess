@@ -6,7 +6,7 @@ It's written in rust and uses the bevy game engine.
 * piece highlighting
 
 # What it looks like
-<img src="assets/pong-clone-asset.png" />
+<img src="assets/chess.png" />
 
 ## TODO
 * check king safety
