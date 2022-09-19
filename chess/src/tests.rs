@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::board::*;
     use crate::piece::*;
     
@@ -24,6 +23,14 @@ mod test {
         let moves: Vec<Move> = vec![Move::new(Piece::black(Kind::Pawn, (0, 4)), (0, 6), (0, 4))];
 
         assert!(pieces[0].get_moves(&pieces, &moves, false) == vec![(0, 5), (1, 5)]);
+    }
+
+    #[test]
+    fn en_passant_not_possible() {
+        let pieces: Vec<Piece> = vec![Piece::white(Kind::Pawn, (1, 4)), Piece::black(Kind::Pawn, (0, 4))];
+        let moves: Vec<Move> = vec![];
+
+        assert!(pieces[0].get_moves(&pieces, &moves, false) == vec![(1, 5)]);
     }
 
     #[test]
