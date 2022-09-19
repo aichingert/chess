@@ -132,7 +132,7 @@ impl Piece {
             }
         }
 
-        panic!("no kind found!");
+        panic!("no king found!");
     }
 
     fn check_king_moves(&self, moves: &Vec<Move>, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
@@ -238,7 +238,7 @@ impl Piece {
                     encounter = false;
 
                     for piece in pieces {
-                        if self.pos.0 as i8 > -1 && piece.pos.0 == self.pos.0 - 1 && piece.pos.1 == self.pos.1 + 1 && self.color != piece.color {
+                        if self.pos.0 as i8 > 0 && piece.pos.0 == self.pos.0 - 1 && piece.pos.1 == self.pos.1 + 1 && self.color != piece.color {
                             possible_position.push((self.pos.0 - 1, self.pos.1 + 1))
                         }
 
@@ -549,5 +549,24 @@ impl Piece {
         }
 
         possible_positions
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn standard_pawn_moves() {
+        let pieces: Vec<Piece> = vec![Piece::white(Kind::Pawn, (0, 1))];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![(0,3), (0,2)]);
+    }
+
+    #[test]
+    fn no_possible_moves_when_blocked() {
+        let pieces: Vec<Piece> = vec![Piece::white(Kind::Pawn, (0, 1)), Piece::black(Kind::Pawn, (0, 2))];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![]);
     }
 }
