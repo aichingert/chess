@@ -24,6 +24,7 @@ mod logic;
 mod states;
 mod menu;
 mod timer;
+mod tests;
 
 use piece::PiecePlugin;
 use board::BoardPlugin;
