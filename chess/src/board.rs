@@ -109,7 +109,7 @@ impl Square {
 }
 
 impl Move {
-    fn new(piece: Piece, from: (u8, u8), to: (u8, u8)) -> Self {
+    pub fn new(piece: Piece, from: (u8, u8), to: (u8, u8)) -> Self {
         Self { 
             piece, 
             from, 
