@@ -109,7 +109,7 @@ mod test {
     }
 
     #[test]
-    fn rook_one_side_blocked() {
+    fn rook_on_top_blocked() {
         let pieces: Vec<Piece> = vec![
             Piece::white(Kind::Rook, (2, 2)),
             Piece::white(Kind::Pawn, (2, 3))
@@ -120,5 +120,19 @@ mod test {
             (1, 2), (0, 2), 
             (2, 1), (2, 0)
         ]);
+    }
+
+    #[test]
+    fn rook_on_bottom_blocked() {
+        let pieces: Vec<Piece> = vec![
+            Piece::white(Kind::Rook, (2, 2)),
+            Piece::white(Kind::Pawn, (2, 1))
+        ];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+            (3, 2), (4, 2), (5, 2), (6, 2), (7, 2),
+            (1, 2), (0, 2),
+            (2, 3), (2, 4), (2, 5), (2, 6), (2, 7)
+        ])
     }
 }
