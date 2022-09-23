@@ -96,7 +96,7 @@ mod test {
     }
 
     #[test]
-    fn rook_unable_to_move_when_blocked() {
+    fn rook_unable_to_move_when_fully_blocked() {
         let pieces: Vec<Piece> = vec![
             Piece::white(Kind::Rook, (3, 3)),
             Piece::white(Kind::Pawn, (4, 3)),
@@ -106,6 +106,20 @@ mod test {
         ];
 
         assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![]);
+    }
+
+    #[test]
+    fn rook_blocked_from_three_sides() {
+        let pieces: Vec<Piece> = vec![
+            Piece::white(Kind::Rook, (3, 3)),
+            Piece::white(Kind::Pawn, (2, 3)),
+            Piece::white(Kind::Pawn, (3, 2)),
+            Piece::white(Kind::Pawn, (3, 4))
+        ];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+            (4, 3), (5, 3), (6, 3), (7, 3)
+        ]);
     }
 
     #[test]
