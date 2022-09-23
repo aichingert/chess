@@ -69,7 +69,7 @@ mod test {
     fn pawn_promotion_check() {
         // Not implemented yet
 
-        let pieces: Vec<Piece> = vec![Piece::white(Kind::Pawn, (1, 7))];
+        // let pieces: Vec<Piece> = vec![Piece::white(Kind::Pawn, (1, 7))];
 
         assert!(false);
     }
@@ -147,6 +147,20 @@ mod test {
 
         assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
             (3, 4), (3, 5), (3, 6), (3, 7)
+        ]);
+    }
+
+    #[test]
+    fn rook_blocked_from_three_sides_bottom_open() {
+        let pieces: Vec<Piece> = vec![
+            Piece::white(Kind::Rook, (3, 3)),
+            Piece::white(Kind::Pawn, (4, 3)),
+            Piece::white(Kind::Pawn, (2, 3)),
+            Piece::white(Kind::Pawn, (3, 4))
+        ];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+            (3, 2), (3, 1), (3, 0)
         ]);
     }
 
