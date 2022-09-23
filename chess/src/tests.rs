@@ -137,6 +137,20 @@ mod test {
     }
 
     #[test]
+    fn rook_blocked_from_three_sides_top_open() {
+        let pieces: Vec<Piece> = vec![
+            Piece::white(Kind::Rook, (3, 3)),
+            Piece::white(Kind::Pawn, (4, 3)),
+            Piece::white(Kind::Pawn, (2, 3)),
+            Piece::white(Kind::Pawn, (3, 2)),
+        ];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+            (3, 4), (3, 5), (3, 6), (3, 7)
+        ]);
+    }
+
+    #[test]
     fn rook_on_top_blocked() {
         let pieces: Vec<Piece> = vec![
             Piece::white(Kind::Rook, (2, 2)),
