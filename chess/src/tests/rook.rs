@@ -156,11 +156,25 @@ mod test {
 
         assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
             (4, 3), (5, 3), (6, 3), (7, 3),
-            (3, 2), (3, 1), (3, 0),
+            (3, 2), (3, 1), (3, 0)
         ]);
     }
-    
-   #[test]
+     
+    #[test]
+    fn rook_blocked_from_two_sides_bottom_left_open() {
+        let pieces: Vec<Piece> = vec![
+            Piece::white(Kind::Rook, (3, 3)),
+            Piece::white(Kind::Pawn, (4, 3)),
+            Piece::white(Kind::Pawn, (3, 4)),
+        ];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+            (2, 3), (1, 3), (0, 3),
+            (3, 2), (3, 1), (3, 0)
+        ]);
+    }
+
+    #[test]
     fn rook_on_right_blocked() {
         let pieces: Vec<Piece> = vec![
             Piece::white(Kind::Rook, (2, 2)),
@@ -213,6 +227,20 @@ mod test {
             (3, 2), (4, 2), (5, 2), (6, 2), (7, 2),
             (1, 2), (0, 2),
             (2, 3), (2, 4), (2, 5), (2, 6), (2, 7)
+        ])
+    }
+
+    #[test]
+    fn rook_can_not_take_through_enemy_piece() {
+        let pieces: Vec<Piece> = vec![
+            Piece::white(Kind::Rook, (0, 0)),
+            Piece::white(Kind::Knight, (1, 0)),
+            Piece::black(Kind::Rook, (0, 7)),
+            Piece::black(Kind::Pawn, (0, 6))
+        ];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+            (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6)
         ])
     }
 }
