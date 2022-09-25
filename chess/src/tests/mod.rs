@@ -1,4 +1,2 @@
-// 
-
 mod rook;
 mod pawn;
