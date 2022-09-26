@@ -19,3 +19,10 @@ Testing
 * blocked from one side
 * not blocked
 * move through piece
+
+## Knight
+Testing 
+
+* bounds
+* middle
+* taking enemy pieces
