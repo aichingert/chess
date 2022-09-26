@@ -37,4 +37,16 @@ mod test {
             (3, 5), (5, 5)
         ]);
     }
+
+    #[test]
+    fn knight_on_bottom_side() {
+        let pieces: Vec<Piece> = vec![
+            Piece::white(Kind::Knight, (4, 0))
+        ];
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+            (2, 1), (6, 1),
+            (3, 2), (5, 2)
+        ]);
+    }
 }
