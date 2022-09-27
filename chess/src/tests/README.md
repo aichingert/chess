@@ -1,8 +1,8 @@
 # Tests for the pieces
 
 ## Pawn
-Testing
 
+Testing
 * en passant
 * starting with double move
 * can't move when blocked
@@ -10,8 +10,8 @@ Testing
 * promotion
 
 ## Rook
-Testing
 
+Testing
 * corner moves
 * blocked from all sides
 * blocked from three sides
@@ -21,15 +21,22 @@ Testing
 * move through piece
 
 ## Knight
-Testing 
 
+Testing 
 * bounds
 * middle
 * taking enemy pieces
 
 ## Bishop
-Testing
 
+Testing
 * bounds
 * blocked
 * take pieces
+
+## King
+
+Testing
+* corner
+* middle
+* in check
