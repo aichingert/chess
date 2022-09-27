@@ -142,8 +142,8 @@ impl Piece {
             for j in -1..2 {
                 if self.pos.0 as i8 + i > -1 
                 && self.pos.1 as i8 + j > -1
-                && self.pos.0 + (i as u8) < 8
-                && self.pos.1 + (j as u8) < 8 
+                && self.pos.0 as i8 + i < 8
+                && self.pos.1 as i8 + j < 8 
                 {
                     let mut encounter: (bool, PieceColor) = (false, PieceColor::White);
 
