@@ -25,4 +25,17 @@ mod test {
             (4, 2), (4, 3), (4, 4)
         ]);
     }
+
+    #[test]
+    fn king_in_check_from_queen() {
+        let pieces: Vec<Piece> = vec![
+            Piece::white(Kind::King, (3, 3)),
+            Piece::black(Kind::King, (7, 7)), // Need a second king because the get moves function checks if there are 2 kings
+            Piece::black(Kind::Queen, (3, 4))
+        ];   
+
+        assert!(pieces[0].get_moves(&pieces, &vec![], true) == vec![
+            (4, 2), (4, 4)
+        ])
+    }
 }

@@ -97,7 +97,7 @@ impl Piece {
             }
         }
 
-        println!("{:?}", king_moves);
+        // println!("{:?}", king_moves);
 
         match under_check {
             1 => {
