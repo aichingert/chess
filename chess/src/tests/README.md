@@ -26,3 +26,10 @@ Testing
 * bounds
 * middle
 * taking enemy pieces
+
+## Bishop
+Testing
+
+* bounds
+* blocked
+* take pieces
