@@ -382,7 +382,7 @@ impl Piece {
         j = 0;
 
         
-        'finished_diagonal_left_down: for i in self.pos.0+1..8 {
+        'finished_diagonal_left_down: for i in 1..self.pos.0 {
             let mut encounter: (bool, PieceColor) = (false, PieceColor::White);
             j += 1;
 
