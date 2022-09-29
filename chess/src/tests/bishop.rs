@@ -8,6 +8,7 @@ mod test {
             Piece::white(Kind::Bishop, (3, 3))
         ];
 
+        println!("{:?}", pieces[0].get_moves(&pieces, &vec![], false));
         assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
             (4, 4), (5, 5), (6, 6), (7, 7),
             (2, 2), (1, 1), (0, 0), 

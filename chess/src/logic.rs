@@ -1,5 +1,3 @@
-use bevy::prelude::*;
-
 use crate::piece::*;
 use crate::board::Move;
 
@@ -118,9 +116,6 @@ impl Piece {
 
 
             },
-            _ => {
-
-            }
         }
 
         for i in 0..index.len() {
@@ -437,26 +432,23 @@ impl Piece {
             }
         }
 
-        j = 0;
-
-        'finished_diagonal_right_down: for i in self.pos.0+1..8 {
+        'finished_diagonal_right_down: for i in 1..=self.pos.1 {
             let mut encounter: (bool, PieceColor) = (false, PieceColor::White);
-            j += 1;
 
             for piece in pieces {
-                if i == piece.pos.0 && self.pos.1 - j == piece.pos.1 {
+                if self.pos.0 + i == piece.pos.0 && self.pos.1 - i == piece.pos.1 {
                     encounter = (true, piece.color);
                 }
             }
 
             if encounter.0 {
                 if encounter.1 != self.color {
-                    possible_positions.push((i, self.pos.1 - j));
+                    possible_positions.push((self.pos.0 + i, self.pos.1 - i));
                 }
 
                 break 'finished_diagonal_right_down;
             } else {
-                possible_positions.push((i, self.pos.1 - j));
+                possible_positions.push((self.pos.0 + i, self.pos.1 - i));
             }
         }
 
