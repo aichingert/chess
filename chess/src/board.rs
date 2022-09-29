@@ -133,7 +133,7 @@ fn select_square(
     let window: &Window = windows.get_primary().unwrap();
 
     if let Some(pos) = window.cursor_position() {
-        if pos.x <= 299.0 {
+        if pos.x <= 200.0 {
             return;
         }
 
@@ -431,7 +431,7 @@ fn create_board(
                         },
                         transform: Transform {
                             translation: square_position.extend(0.0),
-                            scale: Vec3::new(super::SQUARE_SIZE, super::SQUARE_SIZE, 1.0),
+                            scale: Vec3::new(super::SQUARE_SIZE, super::SQUARE_SIZE, 0.0),
                             ..default()
                         },
                         ..default()
