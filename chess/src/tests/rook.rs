@@ -174,6 +174,11 @@ mod test {
         ]);
     }
 
+    /// Rook on right blocked test
+    /// 
+    /// Checks if the rook can move 
+    /// to the other directions when 
+    /// he is blocked from the right
     #[test]
     fn rook_on_right_blocked() {
         let pieces: Vec<Piece> = vec![
@@ -188,6 +193,11 @@ mod test {
        ]);
     }
 
+    /// Rook on left blocked test
+    /// 
+    /// Checks if the rook can move 
+    /// to the other directions when 
+    /// he is blocked from the left
     #[test]
     fn rook_on_left_blocked() {
         let pieces: Vec<Piece> = vec![
@@ -202,6 +212,11 @@ mod test {
        ]);
     }
 
+    /// Rook on top blocked test
+    /// 
+    /// Checks if the rook can move 
+    /// to the other directions when 
+    /// he is blocked from the top
     #[test]
     fn rook_on_top_blocked() {
         let pieces: Vec<Piece> = vec![
@@ -216,6 +231,11 @@ mod test {
         ]);
     }
 
+    /// Rook on bottom blocked test
+    /// 
+    /// Checks if the rook can move 
+    /// to the other directions when 
+    /// he is blocked from the bottom
     #[test]
     fn rook_on_bottom_blocked() {
         let pieces: Vec<Piece> = vec![
