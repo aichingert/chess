@@ -3,7 +3,7 @@ use crate::board::Move;
 
 impl Piece {
     pub fn is_move_valid(&mut self, pos: (u8, u8), pieces: &Vec<Piece>, game_history: &Vec<Move>) -> (bool, i8) {
-        let moves: Vec<(u8, u8)> = self.get_moves(pieces, game_history, true);
+        let moves: Vec<(u8, u8)> = self.get_moves(pieces, game_history);
         let mut en_passant: i8 = 0;
 
         if game_history.len() > 1 {
@@ -26,16 +26,12 @@ impl Piece {
         (moves.contains(&pos), en_passant)
     }
 
-    pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>, check_safety: bool) -> Vec<(u8, u8)> {
+    pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<(u8, u8)> {
         let mut possible_moves: Vec<(u8, u8)> = Vec::new();
-        let result: bool;
 
-        if check_safety {
-            (possible_moves, result)  = self.check_king_safety(pieces, moves);
+        if !self.is_king_safe(pieces, moves) {
 
-            if result {
-                return possible_moves;
-            }
+            return Vec::new();
         }
 
         match self.kind {
@@ -67,12 +63,11 @@ impl Piece {
         possible_moves
     }
 
-    fn check_king_safety(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> (Vec<(u8, u8)>, bool) {
+    fn is_king_safe(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) ->  bool {
         let king: Piece = match self.kind {
             Kind::King => self.clone(),
             _ => Piece::get_king(pieces, self.color),
         };
-        let mut checked: bool = false;
 
         let mut possible_enemy_moves: Vec<Vec<(u8, u8)>> = Vec::new();
         let mut possible_team_moves: Vec<Vec<(u8, u8)>> = Vec::new();
@@ -85,44 +80,14 @@ impl Piece {
             }
         }
 
-        let mut king_moves: Vec<(u8, u8)> = king.get_moves(pieces, moves, false);
-        let mut under_check: u8 = 0;
-        let mut index: Vec<usize> = vec![];
-        let mut offset: usize = 0;
+        // Is king safe method approach
+        // 
+        // 1. Check if king is in check
+        // 2. if king is in check, check if the current piece can block the check
+        // 3. if No piece can block the check send check mate
+        //
 
-        for i in 0..possible_enemy_moves.len() {
-            if possible_enemy_moves[i].contains(&king.pos) {
-                under_check += 1;
-                checked = true;
-            }
-        }
-
-        // println!("{:?}", king_moves);
-
-        match under_check {
-            0 => {
-                return (vec![], false);
-            }
-            _ => {
-                for i in 0..king_moves.len() {
-                    for j in 0..possible_enemy_moves.len() {
-                        if possible_enemy_moves[j].contains(&king_moves[i]) {
-                            println!("{:?}", king_moves[i]);
-                            index.push(i - offset);
-                            offset += 1;
-                        }
-                    }
-                }
-
-
-            },
-        }
-
-        for i in 0..index.len() {
-            king_moves.remove(index[i]);
-        }
-
-        (king_moves, checked)
+        true
     }
 
     fn get_king(pieces: &Vec<Piece>, searching: PieceColor) -> Piece {
