@@ -194,7 +194,7 @@ fn select_piece(
                     }
                 }
 
-                let positions: Vec<(u8, u8)> = piece.get_moves(&pieces_on_the_board, &game_history.moves, true);
+                let positions: Vec<(u8, u8)> = piece.get_moves(&pieces_on_the_board, &game_history.moves);
 
                 for i in 0..positions.len() {
                     for (entity, square) in square_query.iter() {

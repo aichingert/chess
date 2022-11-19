@@ -8,7 +8,7 @@ mod test {
             Piece::white(Kind::Knight, (0, 4))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (2, 5), (2, 3),
             (1, 6), (1, 2)
         ]);
@@ -20,7 +20,7 @@ mod test {
             Piece::white(Kind::Knight, (7, 4))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (5, 5), (5, 3),
             (6, 6), (6, 2)
         ]);
@@ -32,7 +32,7 @@ mod test {
             Piece::white(Kind::Knight, (4, 7))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (2, 6), (6, 6),
             (3, 5), (5, 5)
         ]);
@@ -44,7 +44,7 @@ mod test {
             Piece::white(Kind::Knight, (4, 0))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (2, 1), (6, 1),
             (3, 2), (5, 2)
         ]);
@@ -58,7 +58,7 @@ mod test {
             Piece::white(Kind::Queen, (6, 1))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (2, 1),
             (3, 2), (5, 2)
         ]);

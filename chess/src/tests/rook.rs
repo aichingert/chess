@@ -6,7 +6,7 @@ mod test {
     fn rook_standard_moves() {
         let pieces: Vec<Piece> = vec![Piece::white(Kind::Rook, (3, 3))];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (4, 3), (5, 3), (6, 3), (7, 3), 
             (2, 3), (1, 3), (0, 3),
             (3, 4), (3, 5), (3, 6), (3, 7), 
@@ -17,7 +17,7 @@ mod test {
     fn rook_corner_moves() {
         let pieces: Vec<Piece> = vec![Piece::white(Kind::Rook, (0, 0))];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
             (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7)
         ]);
@@ -33,7 +33,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 4))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![]);
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![]);
     }
 
     #[test]
@@ -45,7 +45,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 4))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (4, 3), (5, 3), (6, 3), (7, 3)
         ]);
     }
@@ -59,7 +59,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 4))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (2, 3), (1, 3), (0, 3)
         ]);
     }
@@ -73,7 +73,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 2)),
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (3, 4), (3, 5), (3, 6), (3, 7)
         ]);
     }
@@ -87,7 +87,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 4))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (3, 2), (3, 1), (3, 0)
         ]);
     }
@@ -100,7 +100,7 @@ mod test {
             Piece::white(Kind::Pawn, (2, 3)),
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (3, 4), (3, 5), (3, 6), (3, 7), (3, 2), (3, 1), (3, 0)
         ]);
     }
@@ -113,7 +113,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 4)),
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (4, 3), (5, 3), (6, 3), (7, 3), (2, 3), (1, 3), (0, 3)
         ]);
     }
@@ -126,7 +126,7 @@ mod test {
             Piece::white(Kind::Pawn, (2, 3)),
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (4, 3), (5, 3), (6, 3), (7, 3),
             (3, 4), (3, 5), (3, 6), (3, 7)
         ]);
@@ -140,7 +140,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 2)),
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (2, 3), (1, 3), (0, 3),
             (3, 4), (3, 5), (3, 6), (3, 7)
         ]);
@@ -154,7 +154,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 4)),
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (4, 3), (5, 3), (6, 3), (7, 3),
             (3, 2), (3, 1), (3, 0)
         ]);
@@ -168,7 +168,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 4)),
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (2, 3), (1, 3), (0, 3),
             (3, 2), (3, 1), (3, 0)
         ]);
@@ -186,7 +186,7 @@ mod test {
             Piece::white(Kind::Pawn, (3, 2))
         ];
         
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (1, 2), (0, 2),
             (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
             (2, 1), (2, 0)
@@ -205,7 +205,7 @@ mod test {
             Piece::white(Kind::Pawn, (1, 2))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (3, 2), (4, 2), (5, 2), (6, 2), (7, 2),
             (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
             (2, 1), (2, 0)
@@ -224,7 +224,7 @@ mod test {
             Piece::white(Kind::Pawn, (2, 3))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), 
             (1, 2), (0, 2), 
             (2, 1), (2, 0)
@@ -243,7 +243,7 @@ mod test {
             Piece::white(Kind::Pawn, (2, 1))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (3, 2), (4, 2), (5, 2), (6, 2), (7, 2),
             (1, 2), (0, 2),
             (2, 3), (2, 4), (2, 5), (2, 6), (2, 7)
@@ -259,7 +259,7 @@ mod test {
             Piece::black(Kind::Pawn, (0, 6))
         ];
 
-        assert!(pieces[0].get_moves(&pieces, &vec![], false) == vec![
+        assert!(pieces[0].get_moves(&pieces, &vec![]) == vec![
             (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6)
         ])
     }

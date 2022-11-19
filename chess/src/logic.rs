@@ -31,7 +31,6 @@ impl Piece {
 
         if !self.is_king_safe(pieces, moves) {
 
-            return Vec::new();
         }
 
         match self.kind {
@@ -74,9 +73,9 @@ impl Piece {
 
         for i in 0..pieces.len() {
             if pieces[i].color != self.color {
-                possible_enemy_moves.push(pieces[i].get_moves(pieces, moves, false));
+                possible_enemy_moves.push(pieces[i].get_moves(pieces, moves));
             } else {
-                possible_team_moves.push(pieces[i].get_moves(pieces, moves, false));
+                possible_team_moves.push(pieces[i].get_moves(pieces, moves));
             }
         }
 
@@ -142,7 +141,7 @@ impl Piece {
 
         for i in 0..pieces.len() {
             if pieces[i].color != self.color && pieces[i].kind != Kind::King {
-                possible_enemy_moves.push(pieces[i].get_moves(pieces, moves, false));
+                possible_enemy_moves.push(pieces[i].get_moves(pieces, moves));
             }
         }
 
