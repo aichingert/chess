@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 use crate::states::GameState;
 
+pub type Position = (u8,u8);
+
 impl Plugin for PiecePlugin {
     fn build(&self, app: &mut App) {
         app
@@ -40,7 +42,7 @@ pub enum PieceColor {
 pub struct Piece {
     pub kind: Kind,
     pub color: PieceColor,
-    pub pos: (u8, u8),
+    pub pos: Position,
 }
 
 // Turn struct has the current color that has the move
@@ -73,19 +75,19 @@ impl Turn {
 // Implements the constructors for the a white piece and the black piece
 // also the function promotion => which promotes a pawn to any piece you want, except a pawn again and a king
 impl Piece {
-    pub fn white(kind: Kind, position: (u8, u8)) -> Piece {
+    pub fn white(kind: Kind, pos: Position) -> Piece {
         Piece {
             kind,
             color: PieceColor::White,
-            pos: position,
+            pos,
         }
     }
     
-    pub fn black(kind: Kind, position: (u8, u8)) -> Piece {
+    pub fn black(kind: Kind, pos: Position) -> Piece {
         Piece {
             kind,
             color: PieceColor::Black,
-            pos: position,
+            pos,
         }
     }
 }

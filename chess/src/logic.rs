@@ -2,8 +2,10 @@ use crate::piece::*;
 use crate::board::Move;
 
 impl Piece {
-    pub fn is_move_valid(&mut self, pos: (u8, u8), pieces: &Vec<Piece>, game_history: &Vec<Move>) -> (bool, i8) {
-        let moves: Vec<(u8, u8)> = self.get_moves(pieces, game_history);
+    pub fn is_move_valid(&mut self, pos: Position, pieces: &Vec<Piece>, game_history: &Vec<Move>) -> (bool, i8) {
+        let mut king_safety: Vec<Position> = Vec::new();
+
+        let moves: Vec<Position> = self.get_moves(pieces, game_history);
         let mut en_passant: i8 = 0;
 
         if game_history.len() > 1 {
@@ -26,12 +28,8 @@ impl Piece {
         (moves.contains(&pos), en_passant)
     }
 
-    pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<(u8, u8)> {
-        let mut possible_moves: Vec<(u8, u8)> = Vec::new();
-
-        if !self.is_king_safe(pieces, moves) {
-
-        }
+    pub fn get_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<Position> {
+        let mut possible_moves: Vec<Position> = Vec::new();
 
         match self.kind {
             Kind::Queen => {
@@ -68,8 +66,8 @@ impl Piece {
             _ => Piece::get_king(pieces, self.color),
         };
 
-        let mut possible_enemy_moves: Vec<Vec<(u8, u8)>> = Vec::new();
-        let mut possible_team_moves: Vec<Vec<(u8, u8)>> = Vec::new();
+        let mut possible_enemy_moves: Vec<Vec<Position>> = Vec::new();
+        let mut possible_team_moves: Vec<Vec<Position>> = Vec::new();
 
         for i in 0..pieces.len() {
             if pieces[i].color != self.color {
@@ -99,8 +97,8 @@ impl Piece {
         panic!("no king found!");
     }
 
-    fn check_king_moves(&self, moves: &Vec<Move>, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
-        let mut possible_moves: Vec<(u8, u8)> = Vec::new();
+    fn check_king_moves(&self, moves: &Vec<Move>, pieces: &Vec<Piece>) -> Vec<Position> {
+        let mut possible_moves: Vec<Position> = Vec::new();
 
         for i in -1..2 {
             for j in -1..2 {
@@ -135,7 +133,7 @@ impl Piece {
             }
         }
 
-        let mut possible_enemy_moves: Vec<Vec<(u8, u8)>> = Vec::new();
+        let mut possible_enemy_moves: Vec<Vec<Position>> = Vec::new();
         let mut index: Vec<usize> = vec![];
         let mut offset: usize = 0;
 
@@ -163,8 +161,8 @@ impl Piece {
         possible_moves
     }
 
-    fn check_pawn_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<(u8, u8)> {
-        let mut possible_position: Vec<(u8, u8)> = Vec::new();
+    fn check_pawn_moves(&self, pieces: &Vec<Piece>, moves: &Vec<Move>) -> Vec<Position> {
+        let mut possible_position: Vec<Position> = Vec::new();
 
         match self.color {
             PieceColor::White => {
@@ -278,8 +276,8 @@ impl Piece {
         possible_position
     }
 
-    fn check_horse_moves(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
-        let mut possible_positions: Vec<(u8, u8)> = Vec::new();
+    fn check_horse_moves(&self, pieces: &Vec<Piece>) -> Vec<Position> {
+        let mut possible_positions: Vec<Position> = Vec::new();
 
         let moves_to_check: Vec<(i8, i8)> = vec![
             (self.pos.0 as i8 - 2, self.pos.1 as i8 + 1),
@@ -371,8 +369,8 @@ impl Piece {
         possible_positions
     }
 
-    fn check_diagonal_right(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
-        let mut possible_positions: Vec<(u8, u8)> = Vec::new();
+    fn check_diagonal_right(&self, pieces: &Vec<Piece>) -> Vec<Position> {
+        let mut possible_positions: Vec<Position> = Vec::new();
         let mut j: u8 = 0;
 
         'finished_diagonal_right_up: for i in self.pos.0+1..8 {
@@ -419,8 +417,8 @@ impl Piece {
         possible_positions
     }
 
-    fn check_vertical(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
-        let mut possible_positions: Vec<(u8, u8)> = Vec::new();
+    fn check_vertical(&self, pieces: &Vec<Piece>) -> Vec<Position> {
+        let mut possible_positions: Vec<Position> = Vec::new();
 
         'finished_up: for i in self.pos.1+1..8 {
             let mut encounter: (bool, PieceColor) = (false, PieceColor::Black);
@@ -467,8 +465,8 @@ impl Piece {
         possible_positions
     }
 
-    fn check_horizontal(&self, pieces: &Vec<Piece>) -> Vec<(u8, u8)> {
-        let mut possible_positions: Vec<(u8, u8)> = Vec::new();
+    fn check_horizontal(&self, pieces: &Vec<Piece>) -> Vec<Position> {
+        let mut possible_positions: Vec<Position> = Vec::new();
 
         'finished_right: for i in self.pos.0+1..8 {
             let mut encounter: (bool, PieceColor) = (false, PieceColor::Black);
