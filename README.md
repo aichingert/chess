@@ -12,6 +12,8 @@ It's written in rust and uses the bevy game engine. It is used together from one
 * check king safety
 * win detection
 
+i changed smth
+
 ## Setup
 * install the rust compiler (you can download it on the official <a href="https://www.rust-lang.org/" traget="_blank">rust-lang<a/> site)
 * clone the project
