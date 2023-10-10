@@ -1,16 +1,16 @@
 set -e
 
-mkdir -p dist/wasm
+mkdir -p dist
 
-wasm-pack build --target web --out-dir dist/wasm
+wasm-pack build --target web --out-dir dist
 
 echo "<!DOCTYPE html>
-<html lang="en">
+<html lang=\"en\">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset=\"UTF-8\">
+    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
     <title>Learn WGPU</title>
     <style>
         canvas {
@@ -19,11 +19,11 @@ echo "<!DOCTYPE html>
     </style>
 </head>
 
-<body id="wasm-example">
-  <script type="module">
-      import init from "./pkg/pong.js";
+<body id=\"wasm-example\">
+  <script type=\"module\">
+      import init from \"./chess.js\";
       init().then(() => {
-          console.log("WASM Loaded");
+          console.log(\"WASM Loaded\");
       });
   </script>
 </body>
