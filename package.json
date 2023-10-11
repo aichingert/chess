@@ -1,0 +1,14 @@
+{
+  "name": "chess",
+  "version": "0.1.0",
+  "files": [
+    "chess_bg.wasm",
+    "chess.js",
+    "chess.d.ts"
+  ],
+  "module": "chess.js",
+  "types": "chess.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
