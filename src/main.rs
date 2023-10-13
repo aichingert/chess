@@ -1,5 +1,5 @@
 use chess::run;
 
 fn main() {
-    run();
+    pollster::block_on(run());
 }
