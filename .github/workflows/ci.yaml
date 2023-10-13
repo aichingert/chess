@@ -14,7 +14,7 @@ on:
           with:
               toolchain: stable
               override: true
-              components: rustfmt, clippy
+              components: rustfmt
 
         - name: Install wasm-pack 
           run: |
