@@ -3,6 +3,7 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::{Window, WindowBuilder},
 };
+use wgpu::Color;
 
 struct State {
     surface: wgpu::Surface,
@@ -11,7 +12,16 @@ struct State {
     config: wgpu::SurfaceConfiguration,
     size: winit::dpi::PhysicalSize<u32>,
     window: Window,
+    color: Color,
+    current: usize,
 }
+
+const COLORS: [Color; 4] = [
+    Color { r: 0.5, g: 0., b: 0., a: 0.2 }, 
+    Color { r: 0., g: 0.5, b: 0., a: 0.2 }, 
+    Color { r: 0., g: 0., b: 0.5, a: 0.2 }, 
+    Color { r: 0., g: 0., b: 0., a: 1. }, 
+];
 
 impl State {
     async fn new(window: Window) -> Self {
@@ -66,6 +76,8 @@ impl State {
             queue,
             config,
             size,
+            color: COLORS[0],
+            current: 0,
         }
     } 
 
@@ -83,11 +95,17 @@ impl State {
     }
 
     fn input(&mut self, event: &WindowEvent) -> bool {
+        match event {
+            WindowEvent::CursorMoved { .. } => {
+                self.current = (self.current + 1) % COLORS.len();
+                self.color = COLORS[self.current];
+            },
+            _ => {},
+        }
         false
     }
 
     fn update(&mut self) {
-
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -105,12 +123,7 @@ impl State {
                     view: &view,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: 0.3,
-                            a: 1.0,
-                        }),
+                        load: wgpu::LoadOp::Clear(self.color),
                         store: true,
                     },
                 })],
@@ -147,7 +160,7 @@ pub async fn run() {
         // Winit prevents sizing with CSS, so we have to set
         // the size manually when on web.
         use winit::dpi::PhysicalSize;
-        window.set_inner_size(PhysicalSize::new(450, 400));
+        window.set_inner_size(PhysicalSize::new(800, 800));
 
         use winit::platform::web::WindowExtWebSys;
         web_sys::window()
