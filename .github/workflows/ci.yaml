@@ -3,27 +3,27 @@ on:
   push:
     branches:
       - 'releases/**'
-  jobs:
-    build-rust-wgpu:
-      name: Rust project
-      runs-on: ubuntu-22.04
-      steps:
-        - uses: actions/checkout@v4
-        - name: Install latest nightly
-          uses: actions-rs/toolchain@v1
-          with:
-              toolchain: stable
-              override: true
-              components: rustfmt
+jobs:
+  build-rust-wgpu:
+    name: Rust project
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            override: true
+            components: rustfmt
 
-        - name: Install wasm-pack 
-          run: |
-            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-            ./cicd/build.sh
+      - name: Install wasm-pack 
+        run: |
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+          ./cicd/build.sh
 
-        - name: Deploy
-          uses: JamesIves/github-pages-deploy-action@v4
-          with:
-            GITHUB_TOKEN: ${{ github.TOKEN }}
-            BRANCH: gh-pages
-            FOLDER: dist
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: dist
