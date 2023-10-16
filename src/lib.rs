@@ -3,7 +3,6 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::{Window, WindowBuilder},
 };
-use wgpu::Color;
 
 struct State {
     surface: wgpu::Surface,
@@ -12,16 +11,9 @@ struct State {
     config: wgpu::SurfaceConfiguration,
     size: winit::dpi::PhysicalSize<u32>,
     window: Window,
-    color: Color,
-    current: usize,
+    color: wgpu::Color,
+    render_pipeline: wgpu::RenderPipeline,
 }
-
-const COLORS: [Color; 4] = [
-    Color { r: 0.5, g: 0., b: 0., a: 0.2 }, 
-    Color { r: 0., g: 0.5, b: 0., a: 0.2 }, 
-    Color { r: 0., g: 0., b: 0.5, a: 0.2 }, 
-    Color { r: 0., g: 0., b: 0., a: 1. }, 
-];
 
 impl State {
     async fn new(window: Window) -> Self {
@@ -69,6 +61,50 @@ impl State {
 
         surface.configure(&device, &config);
 
+        let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
+
+        let render_pipeline_layout = 
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Render Pipline Layout"),
+                bind_group_layouts: &[],
+                push_constant_ranges: &[],
+            });
+
+        let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("Render Pipeline"),
+            layout: Some(&render_pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: "vs_main",
+                buffers: &[],
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: "fs_main",
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: config.format,
+                    blend: Some(wgpu::BlendState::REPLACE),
+                    write_mask: wgpu::ColorWrites::ALL,
+                })],
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                strip_index_format: None,
+                front_face: wgpu::FrontFace::Ccw,
+                cull_mode: Some(wgpu::Face::Back),
+                polygon_mode: wgpu::PolygonMode::Fill,
+                unclipped_depth: false,
+                conservative: false,
+            },
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState {
+                count: 1,
+                mask: !0,
+                alpha_to_coverage_enabled: false,
+            },
+            multiview: None,
+        });
+
         Self {
             window,
             surface,
@@ -76,8 +112,8 @@ impl State {
             queue,
             config,
             size,
-            color: COLORS[0],
-            current: 0,
+            color: wgpu::Color { r: 0., g: 0., b: 0., a: 0. },
+            render_pipeline,
         }
     } 
 
@@ -96,13 +132,17 @@ impl State {
 
     fn input(&mut self, event: &WindowEvent) -> bool {
         match event {
-            WindowEvent::CursorMoved { .. } => {
-                self.current = (self.current + 1) % COLORS.len();
-                self.color = COLORS[self.current];
+            WindowEvent::CursorMoved { position, .. } => {
+                self.color = wgpu::Color {
+                    r: position.x as f64 / self.size.width as f64,
+                    g: position.y as f64 / self.size.height as f64,
+                    b: 1.0,
+                    a: 1.0,
+                };
+                true
             },
-            _ => {},
+            _ => false,
         }
-        false
     }
 
     fn update(&mut self) {
@@ -117,7 +157,7 @@ impl State {
         });
 
         {
-            let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &view,
@@ -129,6 +169,9 @@ impl State {
                 })],
                 depth_stencil_attachment: None,
             });
+
+            render_pass.set_pipeline(&self.render_pipeline);
+            render_pass.draw(0..3, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));

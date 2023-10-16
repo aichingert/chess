@@ -14,8 +14,15 @@ echo "<!DOCTYPE html>
     <title>Learn WGPU</title>
     <style>
         canvas {
-            background-color: black;
+            background-color: white;
         }
+
+	body {
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    height: 100%;
+	}
     </style>
 </head>
 
