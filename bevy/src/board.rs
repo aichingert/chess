@@ -19,25 +19,16 @@ struct Square {
 }
 
 pub fn create_board(mut commands: Commands) {
+    let color = [BROWN_COLOR, LIGHT_BROWN_COLOR];
+    
     for row in 0..8 {
         for col in 0..8 {          
-            let color = if (row + col) & 1 == 1 {
-                BROWN_COLOR              
-            } else {
-                LIGHT_BROWN_COLOR              
-            };
- 
-            create_square(&mut commands, color, row, col);
+            create_square(&mut commands, color[((row + col) & 1) as usize], row, col);
         }
     }
 }
 
-fn create_square(commands: &mut Commands, color: Color, y: u8, x: u8) {  
-    let pos = Vec2::new(
-        OFFSET + x as f32 * SQUARE_SIZE,
-        OFFSET + y as f32 * SQUARE_SIZE,
-    );
-    
+fn create_square(commands: &mut Commands, color: Color, y: u8, x: u8) {
     commands
         .spawn((
             SpriteBundle {
@@ -46,7 +37,7 @@ fn create_square(commands: &mut Commands, color: Color, y: u8, x: u8) {
                     ..default()
                 },
                 transform: Transform {
-                    translation: pos.extend(0.),
+                    translation: Vec3::new(OFFSET + x as f32 * SQUARE_SIZE, OFFSET + y as f32 * SQUARE_SIZE, 0.),
                     scale: Vec3::new(SQUARE_SIZE, SQUARE_SIZE, 0.),
                     ..default()
                 },
