@@ -1,6 +1,15 @@
 use bevy::prelude::*;
 
-use crate::consts::{BROWN_COLOR, LIGHT_BROWN_COLOR, SQUARE_SIZE};
+use crate::consts::{BROWN_COLOR, LIGHT_BROWN_COLOR, SQUARE_SIZE, OFFSET};
+
+
+pub struct BoardPlugin;
+
+impl Plugin for BoardPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, create_board);
+    }
+}
 
 #[derive(Component)]
 struct Square {
@@ -11,27 +20,22 @@ struct Square {
 
 pub fn create_board(mut commands: Commands) {
     for row in 0..8 {
-        for col in 0..8 {
-            // 0 => | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 
-            // 1 => | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 
-
-            // 
-            
-            let color = if (row + col) & 1 == 0 {
+        for col in 0..8 {          
+            let color = if (row + col) & 1 == 1 {
                 BROWN_COLOR              
             } else {
                 LIGHT_BROWN_COLOR              
             };
  
-            get_square(&mut commands, color, row, col);
+            create_square(&mut commands, color, row, col);
         }
     }
 }
 
-fn get_square(commands: &mut Commands, color: Color, y: u8, x: u8) -> Entity {  
+fn create_square(commands: &mut Commands, color: Color, y: u8, x: u8) {  
     let pos = Vec2::new(
-        (x * SQUARE_SIZE) as f32,
-        (y * SQUARE_SIZE) as f32,
+        OFFSET + x as f32 * SQUARE_SIZE,
+        OFFSET + y as f32 * SQUARE_SIZE,
     );
     
     commands
@@ -43,11 +47,11 @@ fn get_square(commands: &mut Commands, color: Color, y: u8, x: u8) -> Entity {
                 },
                 transform: Transform {
                     translation: pos.extend(0.),
-                    scale: Vec3::new(SQUARE_SIZE as f32, SQUARE_SIZE as f32, 0.),
+                    scale: Vec3::new(SQUARE_SIZE, SQUARE_SIZE, 0.),
                     ..default()
                 },
                 ..default()
             },
             Square { x, y },
-    )).id()
+    ));
 }
