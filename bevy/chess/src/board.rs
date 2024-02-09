@@ -28,7 +28,6 @@ impl Plugin for BoardPlugin {
                     .with_system(despawn_taken_pieces)
                     .with_system(select_square.label("select_square"))
                     .with_system(
-                        // move_piece needs to run before select_piece
                         move_piece
                             .after("select_square")
                             .before("select_piece"),
@@ -57,7 +56,9 @@ struct Square {
     y: u8,
 }
 
-// Point struct used for piece highlighting so you can iterate over the points and remove them after moving
+// Point struct used for piece highlighting so 
+// you can iterate over the points and remove 
+// them after moving
 #[derive(Component)]
 struct Point;
 

@@ -33,27 +33,27 @@ impl Piece {
 
         match self.kind {
             Kind::Queen => {
-                self.check_horizontal(pieces).iter().for_each( | pos | possible_moves.push(*pos));
-                self.check_vertical(pieces).iter().for_each( | pos | possible_moves.push(*pos));
-                self.check_diagonal_right(pieces).iter().for_each( | pos | possible_moves.push(*pos));
-                self.check_diagonal_left(pieces).iter().for_each( | pos | possible_moves.push(*pos));
+                possible_moves.extend(self.check_horizontal(pieces));
+                possible_moves.extend(self.check_vertical(pieces));
+                possible_moves.extend(self.check_diagonal_right(pieces));
+                possible_moves.extend(self.check_diagonal_left(pieces));
             },
             Kind::King => {
-                self.check_king_moves(moves, pieces).iter().for_each( | pos | possible_moves.push(*pos));
+                possible_moves.extend(self.check_king_moves(moves, pieces));
             },
             Kind::Rook => {
-                self.check_horizontal(pieces).iter().for_each( | pos | possible_moves.push(*pos));
-                self.check_vertical(pieces).iter().for_each( | pos | possible_moves.push(*pos));
+                possible_moves.extend(self.check_horizontal(pieces));
+                possible_moves.extend(self.check_vertical(pieces));
             },
             Kind::Bishop => {
-                self.check_diagonal_right(pieces).iter().for_each( | pos | possible_moves.push(*pos));
-                self.check_diagonal_left(pieces).iter().for_each( | pos | possible_moves.push(*pos));
+                possible_moves.extend(self.check_diagonal_right(pieces));
+                possible_moves.extend(self.check_diagonal_left(pieces));
             },
             Kind::Knight => {
-                self.check_horse_moves(pieces).iter().for_each( | pos | possible_moves.push(*pos));
+                possible_moves.extend(self.check_horse_moves(pieces));
             },
             Kind::Pawn => {
-                self.check_pawn_moves(pieces, moves).iter().for_each( | pos | possible_moves.push(*pos));
+                possible_moves.extend(self.check_pawn_moves(pieces, moves));
             }
         }
 
