@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::consts::{SQUARE_SIZE, OFFSET};
+use crate::board::Board;
 
 pub struct PiecePlugin;
 
@@ -8,8 +9,8 @@ impl Plugin for PiecePlugin {
     fn build(&self, app: &mut App) {
        app
            .add_event::<MovePieceEvent>()
-           .add_systems(Startup, create_pieces)
-           .add_systems(Update, move_piece); 
+           .add_systems(Startup, create_pieces);
+           //.add_systems(Update, move_piece); 
     }
 }
 
@@ -62,12 +63,12 @@ impl Piece {
         path
     }
 
-    fn get_vec3(&self) -> Vec3 {
+    pub fn get_vec3(&self) -> Vec3 {
         Vec3::new(OFFSET + self.loc.0 as f32 * SQUARE_SIZE, OFFSET + self.loc.1 as f32 * SQUARE_SIZE, 1.)
     }
 }
 
-fn create_pieces(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn create_pieces(mut commands: Commands, asset_server: Res<AssetServer>, mut board: ResMut<Board>) {
     use Kind::*;
     let pieces = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook];
     
@@ -89,13 +90,14 @@ fn create_pieces(mut commands: Commands, asset_server: Res<AssetServer>) {
         let white = Piece::new(PieceColor::White, pieces[i as usize], (i, 0));
         let black = Piece::new(PieceColor::Black, pieces[i as usize], (i, 7));
         
-        commands.spawn((create_spritebundle(&w_pawn), w_pawn));
-        commands.spawn((create_spritebundle(&white), white));
-        commands.spawn((create_spritebundle(&b_pawn), b_pawn));
-        commands.spawn((create_spritebundle(&black), black));
+        board.add_entity(1, i as usize, commands.spawn((create_spritebundle(&w_pawn), w_pawn)).id());
+        board.add_entity(6, i as usize, commands.spawn((create_spritebundle(&b_pawn), b_pawn)).id());
+        board.add_entity(0, i as usize, commands.spawn((create_spritebundle(&white), white)).id());
+        board.add_entity(7, i as usize, commands.spawn((create_spritebundle(&black), black)).id());
     }
 }
 
+/*
 fn move_piece(mut piece_move_ev: EventReader<MovePieceEvent>, mut query: Query<(&Piece, &mut Transform)>) {
     for ev in piece_move_ev.read() {
         if let Ok((piece, mut transform)) = query.get_mut(ev.0) {
@@ -103,3 +105,4 @@ fn move_piece(mut piece_move_ev: EventReader<MovePieceEvent>, mut query: Query<(
         }
     }
 }
+*/
