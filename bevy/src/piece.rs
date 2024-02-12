@@ -9,13 +9,18 @@ impl Plugin for PiecePlugin {
     fn build(&self, app: &mut App) {
        app
            .add_event::<MovePieceEvent>()
-           .add_systems(Startup, create_pieces);
-           //.add_systems(Update, move_piece); 
+           .add_event::<TakePieceEvent>()
+           .add_systems(Startup, create_pieces)
+           .add_systems(Update, move_piece)
+           .add_systems(Update, take_piece); 
     }
 }
 
 #[derive(Event)]
-pub struct MovePieceEvent(pub Entity);
+pub struct MovePieceEvent(pub (Entity, (u8, u8)));
+
+#[derive(Event)]
+pub struct TakePieceEvent(pub Entity);
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Kind {
@@ -33,7 +38,7 @@ pub enum PieceColor {
     White,
 }
 
-#[derive(Component)]
+#[derive(Component, Copy, Clone, Eq, PartialEq)]
 pub struct Piece {
     pub kind: Kind,
     pub team: PieceColor,
@@ -97,12 +102,17 @@ fn create_pieces(mut commands: Commands, asset_server: Res<AssetServer>, mut boa
     }
 }
 
-/*
-fn move_piece(mut piece_move_ev: EventReader<MovePieceEvent>, mut query: Query<(&Piece, &mut Transform)>) {
+fn move_piece(mut piece_move_ev: EventReader<MovePieceEvent>, mut query: Query<(&mut Piece, &mut Transform)>) {
     for ev in piece_move_ev.read() {
-        if let Ok((piece, mut transform)) = query.get_mut(ev.0) {
+        if let Ok((mut piece, mut transform)) = query.get_mut(ev.0.0) {
+            piece.loc = ev.0.1;
             transform.translation = piece.get_vec3();
         }
     }
 }
-*/
+
+fn take_piece(mut commands: Commands, mut piece_take_ev: EventReader<TakePieceEvent>) {
+    for ev in piece_take_ev.read() {
+        commands.entity(ev.0).despawn_recursive();
+    }
+}

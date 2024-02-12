@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 use crate::consts::{COLORS, SQUARE_SIZE, OFFSET};
-use crate::piece::Piece;
+use crate::piece::{TakePieceEvent, MovePieceEvent, Piece};
 
 pub struct BoardPlugin;
 
@@ -43,32 +43,39 @@ fn user_input(
     mut board: ResMut<Board>,
     mut selected: ResMut<Selected>, 
     mouse: Res<Input<MouseButton>>,
+    pieces: Query<(Entity, &Piece)>,
     windows: Query<&Window, With<PrimaryWindow>>, 
-    mut pieces: Query<(&mut Piece, &mut Transform)>,
+    mut take_piece_wr: EventWriter<TakePieceEvent>,
+    mut move_piece_wr: EventWriter<MovePieceEvent>,
 ) {
     if !mouse.just_pressed(MouseButton::Left) {
         return;
     }
 
     let Some(Vec2 { x, y }) = windows.single().cursor_position() else { return; };
-
     let (r, c) = ((7 - (y / SQUARE_SIZE) as usize), ((x / SQUARE_SIZE) as usize));
 
-    if let Some(piece) = board.get_entity(r, c) {
-        selected.0 = Some(piece);
-    } else if let Some(movable) = selected.0 {
-        let Ok((mut piece, mut transform)) = pieces.get_mut(movable) else {
-            return;
-        };
-
-        let (src, dst) = (piece.loc, (c, r));
-
-        piece.loc = (c as u8, r as u8);
-        transform.translation = piece.get_vec3();
-
-        board.move_entity((src.0 as usize, src.1 as usize), dst); 
+    if selected.0.is_none() {
+        selected.0 = board.get_entity(r, c);
+        return;
     }
 
+    let Ok((entity, piece)) = pieces.get(selected.0.unwrap()) else {
+        return;
+    };
+
+    if let Some(Ok((dst_entity, dst_piece))) = board.get_entity(r, c).map(|e: Entity| pieces.get(e)) {
+        if piece.team == dst_piece.team {
+            selected.0 = Some(dst_entity);
+            return;
+        }
+
+        take_piece_wr.send(TakePieceEvent(dst_entity));
+    }
+
+    selected.0 = None;
+    board.move_entity((piece.loc.0 as usize, piece.loc.1 as usize), (c, r));
+    move_piece_wr.send(MovePieceEvent((entity, (c as u8, r as u8))));
 }
 
 fn create_board(mut commands: Commands) {
