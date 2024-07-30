@@ -22,7 +22,7 @@ fn main() {
         .add_plugins(BoardPlugin)
         .add_plugins(PiecePlugin)
         .add_systems(Startup, init)
-        .run()
+        .run();
 }
 
 fn init(mut commands: Commands) {

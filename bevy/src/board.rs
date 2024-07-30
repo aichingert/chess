@@ -42,7 +42,7 @@ impl Board {
 fn user_input(
     mut board: ResMut<Board>,
     mut selected: ResMut<Selected>, 
-    mouse: Res<Input<MouseButton>>,
+    mouse: Res<ButtonInput<MouseButton>>,
     pieces: Query<(Entity, &Piece)>,
     windows: Query<&Window, With<PrimaryWindow>>, 
     mut take_piece_wr: EventWriter<TakePieceEvent>,
